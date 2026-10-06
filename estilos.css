@@ -1,17 +1,116 @@
+/* =========================================
+   AGENDAWEB · ESTILOS
+   Estética Night City con dos temas:
+   [data-theme="dark"]  y  [data-theme="light"]
+   Todo el color sale de las variables de abajo.
+   ========================================= */
+
+
+/* ========================= */
+/* VARIABLES · FUENTES Y BASE */
+/* ========================= */
+
 :root {
-
-    --fondo: #F2F5F8;
-    --superficie: #FFFFFF;
-
-    --texto-principal: #263746;
-    --texto-secundario: #617383;
-
-    --acento: #5B7C99;
-
-    --borde: #D3DDE5;
 
     --fuente-titulo: 'Poppins', sans-serif;
     --fuente-cuerpo: 'Inter', sans-serif;
+
+}
+
+
+/* ========================= */
+/* TEMA OSCURO (por defecto) */
+/* ========================= */
+
+:root,
+[data-theme="dark"] {
+
+    color-scheme: dark;
+
+    --fondo: #08090D;
+    --superficie: #111318;
+    --tarjeta: #191B21;
+    --borde: #30333A;
+
+    --texto-principal: #F1F1F1;
+    --texto-secundario: #9B9DA5;
+
+    --acento: #FCEE0A;
+    --acento-hover: #FFF52B;
+    --acento-texto: #FCEE0A;          /* amarillo cuando se usa como texto */
+    --texto-sobre-acento: #08090D;    /* texto encima de fondos amarillos */
+
+    --info: #00D9FF;
+    --info-texto: #00D9FF;
+    --magenta: #FF007F;
+    --magenta-texto: #FF3D9A;
+    --error: #FF304F;
+
+    --acento-suave: rgba(252, 238, 10, 0.12);
+    --campo-bg: #0E1014;
+    --hover-bg: rgba(255, 255, 255, 0.05);
+
+    --sombra-tarjeta: 0 6px 18px rgba(0, 0, 0, 0.45);
+    --sombra-panel: none;
+    --glow: 0 0 14px rgba(252, 238, 10, 0.28);
+    --anillo-foco: 0 0 0 3px rgba(252, 238, 10, 0.16);
+
+    /* Dark: esquinas más angulares */
+    --radio-sm: 3px;
+    --radio-md: 6px;
+    --radio-pill: 3px;
+    --radio-switch: 4px;
+    --radio-perilla: 2px;
+
+    --linea-header: 2px solid var(--acento);
+
+}
+
+
+/* ========================= */
+/* TEMA CLARO (corporativo)  */
+/* ========================= */
+
+[data-theme="light"] {
+
+    color-scheme: light;
+
+    --fondo: #F2F2EE;
+    --superficie: #FFFFFF;
+    --tarjeta: #FAFAF7;
+    --borde: #C8C9C5;
+
+    --texto-principal: #17181C;
+    --texto-secundario: #5F6268;
+
+    --acento: #F5E500;
+    --acento-hover: #D9CA00;
+    --acento-texto: #6F6600;          /* amarillo oscurecido para leer sobre claro */
+    --texto-sobre-acento: #17181C;
+
+    --info: #0099B5;
+    --info-texto: #007A93;
+    --magenta: #D60068;
+    --magenta-texto: #B8005A;
+    --error: #D91E36;
+
+    --acento-suave: rgba(245, 229, 0, 0.28);
+    --campo-bg: #FFFFFF;
+    --hover-bg: rgba(23, 24, 28, 0.05);
+
+    --sombra-tarjeta: 0 4px 14px rgba(23, 24, 28, 0.08);
+    --sombra-panel: 0 1px 3px rgba(23, 24, 28, 0.06);
+    --glow: 0 1px 3px rgba(23, 24, 28, 0.18);
+    --anillo-foco: 0 0 0 3px rgba(0, 153, 181, 0.20);
+
+    /* Light: esquinas suaves, aire corporativo */
+    --radio-sm: 8px;
+    --radio-md: 14px;
+    --radio-pill: 20px;
+    --radio-switch: 999px;
+    --radio-perilla: 50%;
+
+    --linea-header: 3px solid var(--acento);
 
 }
 
@@ -38,6 +137,44 @@ body {
 }
 
 
+/* El atributo hidden debe ganar a display:flex de .evento */
+
+[hidden] {
+    display: none !important;
+}
+
+
+/* Foco visible para teclado (accesibilidad) */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.mes:focus-visible {
+
+    outline: 2px solid var(--info);
+
+    outline-offset: 2px;
+
+}
+
+
+/* Transición suave SOLO mientras se cambia de tema */
+
+html.tema-transicion *,
+html.tema-transicion *::before,
+html.tema-transicion *::after {
+
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease !important;
+
+}
+
+
 /* ========================= */
 /* ENCABEZADO */
 /* ========================= */
@@ -47,6 +184,10 @@ header {
     background-color: var(--superficie);
 
     border-bottom: 1px solid var(--borde);
+
+    box-shadow: inset 0 -1px 0 transparent;
+
+    border-top: var(--linea-header);
 
 }
 
@@ -65,6 +206,8 @@ header {
 
     align-items: center;
 
+    gap: 20px;
+
 }
 
 
@@ -72,11 +215,13 @@ header {
 
     margin: 0;
 
-    color: var(--acento);
+    color: var(--acento-texto);
 
     font-family: var(--fuente-titulo);
 
     font-size: 30px;
+
+    letter-spacing: 0.5px;
 
 }
 
@@ -90,6 +235,132 @@ header {
 }
 
 
+.encabezado-acciones {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 16px;
+
+}
+
+
+/* ========================= */
+/* INTERRUPTOR DE TEMA       */
+/* ========================= */
+
+.selector-tema {
+
+    position: relative;
+
+    width: 64px;
+
+    height: 32px;
+
+    padding: 0;
+
+    flex-shrink: 0;
+
+    background-color: var(--campo-bg);
+
+    border: 1px solid var(--borde);
+
+    border-radius: var(--radio-switch);
+
+    cursor: pointer;
+
+}
+
+
+.selector-tema:hover {
+
+    border-color: var(--acento);
+
+}
+
+
+.selector-tema__icono {
+
+    position: absolute;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    font-size: 13px;
+
+    line-height: 1;
+
+    opacity: 0.55;
+
+}
+
+
+.selector-tema__icono--sol {
+    left: 8px;
+}
+
+
+.selector-tema__icono--luna {
+    right: 8px;
+}
+
+
+.selector-tema__perilla {
+
+    position: absolute;
+
+    top: 3px;
+
+    left: 3px;
+
+    width: 24px;
+
+    height: 24px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background-color: var(--acento);
+
+    border-radius: var(--radio-perilla);
+
+    box-shadow: var(--glow);
+
+    font-size: 13px;
+
+    line-height: 1;
+
+    transition:
+        transform 0.25s ease,
+        background-color 0.3s ease !important;
+
+}
+
+
+/* Claro: perilla a la izquierda con el sol */
+
+.selector-tema__perilla::before {
+    content: "☀️";
+}
+
+
+/* Oscuro: perilla a la derecha con la luna */
+
+[data-theme="dark"] .selector-tema__perilla {
+    transform: translateX(32px);
+}
+
+
+[data-theme="dark"] .selector-tema__perilla::before {
+    content: "🌙";
+}
+
+
 /* ========================= */
 /* BOTÓN AGREGAR */
 /* ========================= */
@@ -98,28 +369,34 @@ header {
 
     background-color: var(--acento);
 
-    color: white;
+    color: var(--texto-sobre-acento);
 
-    border: none;
+    border: 1px solid var(--acento);
 
-    border-radius: 9px;
+    border-radius: var(--radio-sm);
 
     padding: 13px 20px;
 
     font-family: var(--fuente-cuerpo);
 
-    font-weight: 600;
+    font-weight: 700;
 
     font-size: 14px;
 
     cursor: pointer;
+
+    box-shadow: var(--glow);
+
+    transition: 0.2s;
 
 }
 
 
 .boton-agregar:hover {
 
-    opacity: 0.9;
+    background-color: var(--acento-hover);
+
+    border-color: var(--acento-hover);
 
 }
 
@@ -155,7 +432,9 @@ header {
 
     border: 1px solid var(--borde);
 
-    border-radius: 16px;
+    border-radius: var(--radio-md);
+
+    box-shadow: var(--sombra-panel);
 
     padding: 22px;
 
@@ -168,7 +447,11 @@ header {
 }
 
 
+/* Encabezado del menú: ahora es un botón */
+
 .titulo-meses {
+
+    width: 100%;
 
     display: flex;
 
@@ -176,11 +459,37 @@ header {
 
     gap: 13px;
 
-    padding-bottom: 20px;
+    padding: 0 0 20px;
+
+    margin-bottom: 15px;
+
+    background: none;
+
+    border: none;
 
     border-bottom: 1px solid var(--borde);
 
-    margin-bottom: 15px;
+    border-radius: 0;
+
+    color: inherit;
+
+    font: inherit;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        padding-bottom 0.25s ease,
+        margin-bottom 0.25s ease,
+        border-color 0.25s ease;
+
+}
+
+
+.titulo-meses:hover .titulo-meses-nombre {
+
+    color: var(--acento-texto);
 
 }
 
@@ -191,41 +500,130 @@ header {
 
     height: 45px;
 
+    flex-shrink: 0;
+
     display: flex;
 
     align-items: center;
 
     justify-content: center;
 
-    background-color: #E4ECF2;
+    background-color: var(--acento-suave);
 
-    color: var(--acento);
+    border: 1px solid var(--borde);
 
-    border-radius: 11px;
+    border-radius: var(--radio-sm);
 
     font-size: 20px;
 
 }
 
 
-.titulo-meses h2 {
+.titulo-meses-texto {
 
-    margin: 0;
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+
+.titulo-meses-nombre {
+
+    display: block;
 
     font-family: var(--fuente-titulo);
 
     font-size: 19px;
 
+    font-weight: 600;
+
+    transition: color 0.2s;
+
 }
 
 
-.titulo-meses p {
+.titulo-meses-rango {
 
-    margin: 3px 0 0;
+    display: block;
+
+    margin-top: 3px;
 
     color: var(--texto-secundario);
 
     font-size: 12px;
+
+}
+
+
+/* ▼ cerrado  ·  ▲ abierto (gira 180°) */
+
+.indicador-meses {
+
+    flex-shrink: 0;
+
+    color: var(--acento-texto);
+
+    font-size: 12px;
+
+    transition: transform 0.25s ease;
+
+}
+
+
+.titulo-meses[aria-expanded="true"] .indicador-meses {
+
+    transform: rotate(180deg);
+
+}
+
+
+/* Contenido que se expande / contrae suavemente */
+
+.meses-colapsable {
+
+    display: grid;
+
+    grid-template-rows: 1fr;
+
+    visibility: visible;
+
+    transition:
+        grid-template-rows 0.25s ease,
+        visibility 0s linear 0s;
+
+}
+
+
+.meses-interior {
+
+    min-height: 0;
+
+    overflow: hidden;
+
+}
+
+
+.barra-lateral.meses-cerrados .meses-colapsable {
+
+    grid-template-rows: 0fr;
+
+    visibility: hidden;
+
+    transition:
+        grid-template-rows 0.25s ease,
+        visibility 0s linear 0.25s;
+
+}
+
+
+.barra-lateral.meses-cerrados .titulo-meses {
+
+    padding-bottom: 0;
+
+    margin-bottom: 0;
+
+    border-bottom-color: transparent;
 
 }
 
@@ -245,7 +643,7 @@ header {
 
     padding: 14px 12px;
 
-    border-radius: 10px;
+    border-radius: var(--radio-sm);
 
     display: grid;
 
@@ -262,7 +660,7 @@ header {
 
 .mes:hover {
 
-    background-color: var(--fondo);
+    background-color: var(--hover-bg);
 
     transform: translateX(3px);
 
@@ -310,10 +708,9 @@ header {
 
     background-color: var(--acento);
 
-    color: white;
+    color: var(--texto-sobre-acento);
 
-    box-shadow:
-        0 5px 12px rgba(91, 124, 153, 0.18);
+    box-shadow: var(--glow);
 
 }
 
@@ -321,7 +718,9 @@ header {
 .mes.seleccionado > span,
 .mes.seleccionado small {
 
-    color: #E4ECF2;
+    color: var(--texto-sobre-acento);
+
+    opacity: 0.75;
 
 }
 
@@ -345,7 +744,7 @@ header {
 
 .subtitulo {
 
-    color: var(--acento);
+    color: var(--acento-texto);
 
     font-size: 11px;
 
@@ -378,13 +777,15 @@ header {
 
 .contador {
 
-    background-color: #E4ECF2;
+    background-color: var(--acento-suave);
 
-    color: var(--acento);
+    color: var(--acento-texto);
+
+    border: 1px solid var(--borde);
 
     padding: 8px 13px;
 
-    border-radius: 20px;
+    border-radius: var(--radio-pill);
 
     font-size: 12px;
 
@@ -410,17 +811,17 @@ header {
 
 .evento {
 
-    background-color: var(--superficie);
+    background-color: var(--tarjeta);
 
     border: 1px solid var(--borde);
 
-    /*
-       La barra comienza invisible.
-    */
+    /* La barra comienza invisible. */
 
     border-left: 5px solid transparent;
 
-    border-radius: 14px;
+    border-radius: var(--radio-md);
+
+    box-shadow: var(--sombra-panel);
 
     padding: 20px;
 
@@ -435,10 +836,7 @@ header {
 }
 
 
-/*
-   LA BARRA AZUL SOLO APARECE
-   AL PASAR EL MOUSE
-*/
+/* La barra amarilla solo aparece al pasar el mouse */
 
 .evento:hover {
 
@@ -446,8 +844,7 @@ header {
 
     transform: translateY(-2px);
 
-    box-shadow:
-        0 6px 18px rgba(38, 55, 70, 0.06);
+    box-shadow: var(--sombra-tarjeta);
 
 }
 
@@ -477,7 +874,7 @@ header {
 
     font-size: 32px;
 
-    color: var(--acento);
+    color: var(--acento-texto);
 
 }
 
@@ -510,7 +907,7 @@ header {
 
 .hora {
 
-    color: var(--acento);
+    color: var(--info-texto);
 
     font-size: 12px;
 
@@ -527,6 +924,8 @@ header {
 
     font-size: 18px;
 
+    overflow-wrap: anywhere;
+
 }
 
 
@@ -537,6 +936,8 @@ header {
     color: var(--texto-secundario);
 
     font-size: 13px;
+
+    overflow-wrap: anywhere;
 
 }
 
@@ -557,14 +958,16 @@ header {
 
 
 /* ========================= */
-/* ETIQUETAS */
+/* ETIQUETAS (cian / magenta solo como acento) */
 /* ========================= */
 
 .etiqueta {
 
     padding: 5px 10px;
 
-    border-radius: 20px;
+    border: 1px solid transparent;
+
+    border-radius: var(--radio-pill);
 
     font-size: 11px;
 
@@ -575,27 +978,45 @@ header {
 
 .trabajo {
 
-    background-color: #E4ECF2;
+    background-color: color-mix(in srgb, var(--info) 14%, transparent);
 
-    color: #5B7C99;
+    border-color: color-mix(in srgb, var(--info) 40%, transparent);
+
+    color: var(--info-texto);
 
 }
 
 
+.estudio,
 .escuela {
 
-    background-color: #E8EEF3;
+    background-color: var(--acento-suave);
 
-    color: #4F6F8A;
+    border-color: color-mix(in srgb, var(--acento) 45%, transparent);
+
+    color: var(--acento-texto);
 
 }
 
 
 .personal {
 
-    background-color: #E9EDF1;
+    background-color: var(--hover-bg);
 
-    color: #66798A;
+    border-color: var(--borde);
+
+    color: var(--texto-secundario);
+
+}
+
+
+.ocio {
+
+    background-color: color-mix(in srgb, var(--magenta) 14%, transparent);
+
+    border-color: color-mix(in srgb, var(--magenta) 40%, transparent);
+
+    color: var(--magenta-texto);
 
 }
 
@@ -617,13 +1038,25 @@ header {
 }
 
 
-.acciones-evento button {
+.acciones-evento form {
 
-    border: none;
+    margin: 0;
+
+    display: flex;
+
+}
+
+
+.acciones-evento button,
+.acciones-evento a {
+
+    display: inline-block;
+
+    border: 1px solid transparent;
 
     padding: 8px 12px;
 
-    border-radius: 7px;
+    border-radius: var(--radio-sm);
 
     font-family: var(--fuente-cuerpo);
 
@@ -631,39 +1064,51 @@ header {
 
     font-weight: 600;
 
+    text-decoration: none;
+
     cursor: pointer;
+
+    transition: 0.2s;
 
 }
 
 
 .boton-editar {
 
-    background-color: #E4ECF2;
+    background-color: color-mix(in srgb, var(--info) 14%, transparent);
 
-    color: var(--acento);
+    border-color: color-mix(in srgb, var(--info) 40%, transparent) !important;
+
+    color: var(--info-texto);
 
 }
 
 
 .boton-editar:hover {
 
-    background-color: var(--borde);
+    background-color: color-mix(in srgb, var(--info) 26%, transparent);
 
 }
 
 
 .boton-borrar {
 
-    background-color: #F1F3F5;
+    background-color: var(--hover-bg);
 
-    color: #617383;
+    border-color: var(--borde) !important;
+
+    color: var(--texto-secundario);
 
 }
 
 
 .boton-borrar:hover {
 
-    background-color: #DDE4EA;
+    background-color: color-mix(in srgb, var(--error) 14%, transparent);
+
+    border-color: var(--error) !important;
+
+    color: var(--error);
 
 }
 
@@ -674,11 +1119,11 @@ header {
 
 .sin-eventos {
 
-    background-color: var(--superficie);
+    background-color: var(--tarjeta);
 
-    border: 1px solid var(--borde);
+    border: 1px dashed var(--borde);
 
-    border-radius: 14px;
+    border-radius: var(--radio-md);
 
     padding: 40px;
 
@@ -706,6 +1151,48 @@ header {
 
 
 /* ========================= */
+/* AVISOS */
+/* ========================= */
+
+.mensaje-exito,
+.mensaje-error {
+
+    padding: 13px 16px;
+
+    border-radius: var(--radio-sm);
+
+    margin-bottom: 20px;
+
+    font-size: 14px;
+
+    border: 1px solid;
+
+}
+
+
+.mensaje-exito {
+
+    background-color: color-mix(in srgb, var(--info) 12%, transparent);
+
+    border-color: color-mix(in srgb, var(--info) 45%, transparent);
+
+    color: var(--info-texto);
+
+}
+
+
+.mensaje-error {
+
+    background-color: color-mix(in srgb, var(--error) 12%, transparent);
+
+    border-color: color-mix(in srgb, var(--error) 50%, transparent);
+
+    color: var(--error);
+
+}
+
+
+/* ========================= */
 /* CALENDARIO */
 /* ========================= */
 
@@ -717,7 +1204,9 @@ header {
 
     border: 1px solid var(--borde);
 
-    border-radius: 16px;
+    border-radius: var(--radio-md);
+
+    box-shadow: var(--sombra-panel);
 
     padding: 28px;
 
@@ -763,22 +1252,28 @@ header {
 
     height: 38px;
 
-    background-color: var(--fondo);
+    background-color: var(--campo-bg);
+
+    color: var(--texto-principal);
 
     border: 1px solid var(--borde);
 
-    border-radius: 8px;
+    border-radius: var(--radio-sm);
 
     cursor: pointer;
 
     font-size: 17px;
+
+    transition: 0.2s;
 
 }
 
 
 .navegacion button:hover {
 
-    background-color: var(--borde);
+    border-color: var(--acento);
+
+    color: var(--acento-texto);
 
 }
 
@@ -823,7 +1318,7 @@ header {
 
     align-items: center;
 
-    border-radius: 8px;
+    border-radius: var(--radio-sm);
 
     font-size: 14px;
 
@@ -836,7 +1331,7 @@ header {
 
 .dias > div:not(.dia-vacio):hover {
 
-    background-color: var(--fondo);
+    background-color: var(--hover-bg);
 
 }
 
@@ -852,34 +1347,33 @@ header {
 
     background-color: var(--acento);
 
-    color: white;
+    color: var(--texto-sobre-acento);
 
     font-weight: 700;
+
+    box-shadow: var(--glow);
 
 }
 
 
 .dias .evento-dia {
 
-    background-color: #E4ECF2;
+    background-color: var(--acento-suave);
 
-    color: var(--acento);
+    color: var(--acento-texto);
 
     font-weight: 600;
 
 }
 
 
-/*
-   Si el día es hoy y también tiene evento,
-   conserva el estilo de hoy.
-*/
+/* Si el día es hoy y también tiene evento, conserva el estilo de hoy. */
 
 .dias .hoy.evento-dia {
 
     background-color: var(--acento);
 
-    color: white;
+    color: var(--texto-sobre-acento);
 
 }
 
@@ -913,7 +1407,9 @@ header {
 
     border: 1px solid var(--borde);
 
-    border-radius: 16px;
+    border-radius: var(--radio-md);
+
+    box-shadow: var(--sombra-panel);
 
     padding: 35px;
 
@@ -994,9 +1490,9 @@ header {
 
     border: 1px solid var(--borde);
 
-    border-radius: 8px;
+    border-radius: var(--radio-sm);
 
-    background-color: #F8FAFC;
+    background-color: var(--campo-bg);
 
     color: var(--texto-principal);
 
@@ -1009,14 +1505,23 @@ header {
 }
 
 
+.campo input::placeholder,
+.campo textarea::placeholder {
+
+    color: var(--texto-secundario);
+
+    opacity: 0.8;
+
+}
+
+
 .campo input:focus,
 .campo select:focus,
 .campo textarea:focus {
 
     border-color: var(--acento);
 
-    box-shadow:
-        0 0 0 3px rgba(91, 124, 153, 0.10);
+    box-shadow: var(--anillo-foco);
 
 }
 
@@ -1070,7 +1575,7 @@ header {
 
     padding: 11px 18px;
 
-    border-radius: 8px;
+    border-radius: var(--radio-sm);
 
     font-family: var(--fuente-cuerpo);
 
@@ -1078,12 +1583,16 @@ header {
 
     cursor: pointer;
 
+    transition: 0.2s;
+
 }
 
 
 .boton-cancelar:hover {
 
-    background-color: var(--fondo);
+    background-color: var(--hover-bg);
+
+    border-color: var(--texto-secundario);
 
 }
 
@@ -1092,26 +1601,32 @@ header {
 
     background-color: var(--acento);
 
-    color: white;
+    color: var(--texto-sobre-acento);
 
-    border: none;
+    border: 1px solid var(--acento);
 
     padding: 11px 20px;
 
-    border-radius: 8px;
+    border-radius: var(--radio-sm);
 
     font-family: var(--fuente-cuerpo);
 
-    font-weight: 600;
+    font-weight: 700;
 
     cursor: pointer;
+
+    box-shadow: var(--glow);
+
+    transition: 0.2s;
 
 }
 
 
 .boton-crear:hover {
 
-    opacity: 0.9;
+    background-color: var(--acento-hover);
+
+    border-color: var(--acento-hover);
 
 }
 
@@ -1239,9 +1754,26 @@ footer {
     }
 
 
-    .acciones-evento button {
+    .acciones-evento button,
+    .acciones-evento a {
 
         flex: 1;
+
+        text-align: center;
+
+    }
+
+
+    .acciones-evento form {
+
+        flex: 1;
+
+    }
+
+
+    .acciones-evento form button {
+
+        width: 100%;
 
     }
 
@@ -1253,6 +1785,23 @@ footer {
         align-items: flex-start;
 
         gap: 7px;
+
+    }
+
+}
+
+
+/* ========================= */
+/* MOVIMIENTO REDUCIDO */
+/* ========================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        transition-duration: 0.01ms !important;
 
     }
 

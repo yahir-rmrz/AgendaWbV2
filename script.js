@@ -1,186 +1,77 @@
 /* =========================================
    AGENDAWEB
-   Sistema de agenda
+   P4: PHP genera las tarjetas (foreach + mostrarEvento).
+   JavaScript solo se encarga de:
+   - filtrar las tarjetas por mes
+   - dibujar el calendario y los contadores
+   - mostrar / ocultar el formulario
    ========================================= */
 
 
-/* =========================================
-   CONFIGURACIÓN
-   ========================================= */
+/* Mes que se está mostrando (0 = enero ... 11 = diciembre) */
 
-const CLAVE_EVENTOS = "agendaweb_eventos";
-
-
-/*
-   Mes que se está mostrando actualmente.
-
-   8 = septiembre
-   9 = octubre
-   10 = noviembre
-   11 = diciembre
-   0 = enero
-   1 = febrero
-*/
-
-let mesActual = 8;
+let mesActual = 8;      // septiembre
 
 let anioActual = 2026;
 
 
 /*
-   ID del evento que estamos editando.
-
-   null = estamos creando un evento nuevo.
+   Si hoy cae dentro de los meses de la barra lateral
+   (sep 2026 - feb 2027), empezamos en el mes actual.
 */
 
-let eventoEditando = null;
+(function () {
+
+    const hoy = new Date();
+
+    const indice = (hoy.getFullYear() - 2026) * 12 + hoy.getMonth();
+
+    if (indice >= 8 && indice <= 13) {
+
+        mesActual = hoy.getMonth();
+
+        anioActual = hoy.getFullYear();
+
+    }
+
+})();
 
 
 /*
-   Lista de eventos.
+   Eventos que PHP imprimió en index.php
+   (vienen de MySQL con json_encode).
 */
 
-let eventos = [];
+const eventos =
+    typeof eventosDesdePHP !== "undefined"
+        ? eventosDesdePHP
+        : [];
 
-
-
-/* =========================================
-   NOMBRES DE MESES
-   ========================================= */
 
 const nombresMeses = [
-
-    "Enero",
-    "Febrero",
-    "Marzo",
-    "Abril",
-    "Mayo",
-    "Junio",
-    "Julio",
-    "Agosto",
-    "Septiembre",
-    "Octubre",
-    "Noviembre",
-    "Diciembre"
-
+    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ];
 
 
-const mesesCortos = [
+/* Texto "1 evento" / "3 eventos" */
 
-    "ENE",
-    "FEB",
-    "MAR",
-    "ABR",
-    "MAY",
-    "JUN",
-    "JUL",
-    "AGO",
-    "SEP",
-    "OCT",
-    "NOV",
-    "DIC"
+function textoEventos(cantidad) {
 
-];
-
-
-
-/* =========================================
-   EVENTOS INICIALES
-   ========================================= */
-
-const eventosIniciales = [
-
-    {
-        id: 1,
-        titulo: "Reunión de proyecto",
-        fecha: "2026-09-23",
-        hora: "10:00",
-        lugar: "Sala de juntas",
-        categoria: "Trabajo",
-        descripcion:
-            "Revisión de avances y organización de actividades."
-    },
-
-    {
-        id: 2,
-        titulo: "Entrega de actividad",
-        fecha: "2026-09-24",
-        hora: "12:00",
-        lugar: "Plataforma escolar",
-        categoria: "Escuela",
-        descripcion:
-            "Entrega de proyecto de Desarrollo de Aplicaciones Web."
-    },
-
-    {
-        id: 3,
-        titulo: "Partida con amigos",
-        fecha: "2026-09-26",
-        hora: "19:00",
-        lugar: "En línea",
-        categoria: "Personal",
-        descripcion:
-            "Sesión de juego en línea con amigos."
-    },
-
-    {
-        id: 4,
-        titulo: "Planificación semanal",
-        fecha: "2026-09-28",
-        hora: "09:00",
-        lugar: "Oficina",
-        categoria: "Trabajo",
-        descripcion:
-            "Organización de pendientes y actividades de la semana."
-    }
-
-];
-
-
-
-/* =========================================
-   CARGAR EVENTOS
-   ========================================= */
-
-function cargarEventos() {
-
-    const guardados =
-        localStorage.getItem(CLAVE_EVENTOS);
-
-
-    if (guardados) {
-
-        eventos = JSON.parse(guardados);
-
-    } else {
-
-        eventos = eventosIniciales;
-
-        guardarEventos();
-
-    }
-
-
-    actualizarInterfaz();
+    return `${cantidad} ${cantidad === 1 ? "evento" : "eventos"}`;
 
 }
 
 
+/* "2026-10-08" -> { anio: 2026, mes: 9, dia: 8 } */
 
-/* =========================================
-   GUARDAR EVENTOS
-   ========================================= */
+function partesFecha(fecha) {
 
-function guardarEventos() {
+    const [anio, mes, dia] = fecha.split("-").map(Number);
 
-    localStorage.setItem(
-        CLAVE_EVENTOS,
-        JSON.stringify(eventos)
-    );
+    return { anio: anio, mes: mes - 1, dia: dia };
 
 }
-
 
 
 /* =========================================
@@ -193,7 +84,7 @@ function actualizarInterfaz() {
 
     actualizarTituloMes();
 
-    mostrarEventos();
+    filtrarTarjetas();
 
     generarCalendario();
 
@@ -202,53 +93,24 @@ function actualizarInterfaz() {
 }
 
 
-
 /* =========================================
-   ACTUALIZAR MES SELECCIONADO
+   MES SELECCIONADO EN LA BARRA LATERAL
    ========================================= */
 
 function actualizarMesSeleccionado() {
 
-    const meses =
-        document.querySelectorAll(".mes");
+    document.querySelectorAll(".mes").forEach(function (elemento) {
 
+        const esActual =
+            parseInt(elemento.dataset.mes) === mesActual &&
+            parseInt(elemento.dataset.anio) === anioActual;
 
-    meses.forEach(function (elemento) {
-
-        const mes =
-            parseInt(elemento.dataset.mes);
-
-
-        const anio =
-            parseInt(elemento.dataset.anio);
-
-
-        if (
-            mes === mesActual &&
-            anio === anioActual
-        ) {
-
-            elemento.classList.add(
-                "seleccionado"
-            );
-
-        } else {
-
-            elemento.classList.remove(
-                "seleccionado"
-            );
-
-        }
+        elemento.classList.toggle("seleccionado", esActual);
 
     });
 
 }
 
-
-
-/* =========================================
-   SELECCIONAR MES DESDE LA BARRA
-   ========================================= */
 
 function seleccionarMes(mes, anio) {
 
@@ -261,15 +123,9 @@ function seleccionarMes(mes, anio) {
 }
 
 
-
-/* =========================================
-   MES ANTERIOR
-   ========================================= */
-
 function mesAnterior() {
 
     mesActual--;
-
 
     if (mesActual < 0) {
 
@@ -279,21 +135,14 @@ function mesAnterior() {
 
     }
 
-
     actualizarInterfaz();
 
 }
 
 
-
-/* =========================================
-   MES SIGUIENTE
-   ========================================= */
-
 function mesSiguiente() {
 
     mesActual++;
-
 
     if (mesActual > 11) {
 
@@ -303,491 +152,136 @@ function mesSiguiente() {
 
     }
 
-
     actualizarInterfaz();
 
 }
 
 
-
-/* =========================================
-   TÍTULO DEL MES
-   ========================================= */
-
 function actualizarTituloMes() {
 
-    const nombre =
-        nombresMeses[mesActual];
+    const textoMes = `${nombresMeses[mesActual]} ${anioActual}`;
 
+    document.getElementById("tituloCalendario").textContent = textoMes;
 
-    const textoMes =
-        `${nombre} ${anioActual}`;
-
-
-    document.getElementById(
-        "tituloCalendario"
-    ).textContent = textoMes;
-
-
-    document.getElementById(
-        "subtituloEventos"
-    ).textContent =
+    document.getElementById("subtituloEventos").textContent =
         textoMes.toUpperCase();
 
 }
 
 
-
 /* =========================================
-   MOSTRAR EVENTOS DEL MES
+   MOSTRAR SOLO LAS TARJETAS DEL MES
+   (las tarjetas ya existen: las hizo PHP)
    ========================================= */
 
-function mostrarEventos() {
+function filtrarTarjetas() {
 
-    const lista =
-        document.getElementById("listaEventos");
+    const tarjetas = document.querySelectorAll("#listaEventos .evento");
 
+    let visibles = 0;
 
-    const contador =
-        document.getElementById("contadorEventos");
+    tarjetas.forEach(function (tarjeta) {
 
+        const delMes =
+            parseInt(tarjeta.dataset.mes) === mesActual &&
+            parseInt(tarjeta.dataset.anio) === anioActual;
 
-    lista.innerHTML = "";
+        tarjeta.hidden = !delMes;
 
+        if (delMes) {
 
-    /*
-       Solo obtenemos los eventos
-       del mes actualmente seleccionado.
-    */
+            visibles++;
 
-    const eventosDelMes =
-        eventos.filter(function (evento) {
-
-            const fecha =
-                new Date(`${evento.fecha}T00:00:00`);
-
-
-            return (
-
-                fecha.getMonth() === mesActual &&
-
-                fecha.getFullYear() === anioActual
-
-            );
-
-        });
-
-
-    /*
-       Ordenar por fecha y hora.
-    */
-
-    eventosDelMes.sort(function (a, b) {
-
-        const fechaA =
-            new Date(`${a.fecha}T${a.hora}`);
-
-
-        const fechaB =
-            new Date(`${b.fecha}T${b.hora}`);
-
-
-        return fechaA - fechaB;
+        }
 
     });
 
+    /* Aviso "sin eventos este mes" (solo existe si hay eventos en total) */
 
+    const aviso = document.getElementById("sinEventosMes");
 
-    /* =====================================
-       SI NO HAY EVENTOS
-       ===================================== */
+    if (aviso) {
 
-    if (eventosDelMes.length === 0) {
-
-        lista.innerHTML = `
-
-            <div class="sin-eventos">
-
-                <h3>
-                    No tienes eventos registrados
-                </h3>
-
-                <p>
-                    No hay eventos para este mes.
-                </p>
-
-            </div>
-
-        `;
+        aviso.hidden = visibles > 0;
 
     }
 
-
-
-    /* =====================================
-       CREAR TARJETAS
-       ===================================== */
-
-    eventosDelMes.forEach(function (evento) {
-
-        const fecha =
-            new Date(`${evento.fecha}T00:00:00`);
-
-
-        const dia =
-            fecha.getDate();
-
-
-        const mes =
-            mesesCortos[fecha.getMonth()];
-
-
-        const hora =
-            convertirHora(evento.hora);
-
-
-        /*
-           Clase de categoría.
-        */
-
-        let categoriaClase =
-            evento.categoria
-                .toLowerCase()
-                .normalize("NFD")
-                .replace(
-                    /[\u0300-\u036f]/g,
-                    ""
-                );
-
-
-        const tarjeta =
-            document.createElement("article");
-
-
-        tarjeta.className = "evento";
-
-
-        tarjeta.innerHTML = `
-
-            <div class="fecha">
-
-                <span class="dia">
-                    ${dia}
-                </span>
-
-                <span class="mes-corto">
-                    ${mes}
-                </span>
-
-            </div>
-
-
-            <div class="informacion">
-
-                <span class="hora">
-                    ${hora}
-                </span>
-
-
-                <h3>
-                    ${evento.titulo}
-                </h3>
-
-
-                <p>
-                    ${evento.descripcion}
-                </p>
-
-
-                <div class="datos">
-
-                    <span>
-                        ● ${evento.lugar}
-                    </span>
-
-
-                    <span class="etiqueta ${categoriaClase}">
-                        ${evento.categoria}
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <div class="acciones-evento">
-
-                <button
-                    type="button"
-                    class="boton-editar"
-                    onclick="editarEvento(${evento.id})">
-
-                    Editar
-
-                </button>
-
-
-                <button
-                    type="button"
-                    class="boton-borrar"
-                    onclick="borrarEvento(${evento.id})">
-
-                    Borrar
-
-                </button>
-
-            </div>
-
-        `;
-
-
-        lista.appendChild(tarjeta);
-
-    });
-
-
-    /*
-       Actualizar contador.
-    */
-
-    const cantidad =
-        eventosDelMes.length;
-
-
-    contador.textContent =
-        `${cantidad} ${
-            cantidad === 1
-                ? "evento"
-                : "eventos"
-        }`;
+    document.getElementById("contadorEventos").textContent =
+        textoEventos(visibles);
 
 }
 
 
-
 /* =========================================
-   CONVERTIR HORA
-   ========================================= */
-
-function convertirHora(hora) {
-
-    const partes =
-        hora.split(":");
-
-
-    let horas =
-        parseInt(partes[0]);
-
-
-    const minutos =
-        partes[1];
-
-
-    let periodo = "AM";
-
-
-    if (horas >= 12) {
-
-        periodo = "PM";
-
-    }
-
-
-    if (horas === 0) {
-
-        horas = 12;
-
-    }
-
-    else if (horas > 12) {
-
-        horas -= 12;
-
-    }
-
-
-    return `${horas}:${minutos} ${periodo}`;
-
-}
-
-
-
-/* =========================================
-   GENERAR CALENDARIO
+   CALENDARIO
    ========================================= */
 
 function generarCalendario() {
 
-    const calendario =
-        document.getElementById(
-            "diasCalendario"
-        );
-
+    const calendario = document.getElementById("diasCalendario");
 
     calendario.innerHTML = "";
 
+    /* Lunes = 0 ... Domingo = 6 */
 
-    /*
-       Primer día del mes.
-
-       JavaScript:
-       Domingo = 0
-       Lunes = 1
-       ...
-    */
-
-    const primerDia =
-        new Date(
-            anioActual,
-            mesActual,
-            1
-        );
-
-
-    let posicionPrimerDia =
-        primerDia.getDay();
-
-
-    /*
-       Convertimos para que:
-       Lunes = 0
-       Martes = 1
-       ...
-       Domingo = 6
-    */
+    let posicionPrimerDia = new Date(anioActual, mesActual, 1).getDay();
 
     posicionPrimerDia =
-        posicionPrimerDia === 0
-            ? 6
-            : posicionPrimerDia - 1;
+        posicionPrimerDia === 0 ? 6 : posicionPrimerDia - 1;
 
+    const cantidadDias = new Date(anioActual, mesActual + 1, 0).getDate();
 
-    /*
-       Cantidad de días del mes.
-    */
+    for (let i = 0; i < posicionPrimerDia; i++) {
 
-    const cantidadDias =
-        new Date(
-            anioActual,
-            mesActual + 1,
-            0
-        ).getDate();
+        const vacio = document.createElement("div");
 
-
-
-    /*
-       Espacios antes del primer día.
-    */
-
-    for (
-        let i = 0;
-        i < posicionPrimerDia;
-        i++
-    ) {
-
-        const vacio =
-            document.createElement("div");
-
-
-        vacio.className =
-            "dia-vacio";
-
+        vacio.className = "dia-vacio";
 
         calendario.appendChild(vacio);
 
     }
 
+    const hoy = new Date();
 
+    for (let dia = 1; dia <= cantidadDias; dia++) {
 
-    /*
-       Crear cada día.
-    */
+        const elemento = document.createElement("div");
 
-    for (
-        let dia = 1;
-        dia <= cantidadDias;
-        dia++
-    ) {
-
-        const elemento =
-            document.createElement("div");
-
-
-        elemento.textContent =
-            dia;
-
-
-        /*
-           Comprobar si hoy es este día.
-        */
-
-        const hoy =
-            new Date();
-
+        elemento.textContent = dia;
 
         if (
-
             hoy.getFullYear() === anioActual &&
-
             hoy.getMonth() === mesActual &&
-
             hoy.getDate() === dia
-
         ) {
 
-            elemento.classList.add(
-                "hoy"
-            );
+            elemento.classList.add("hoy");
 
         }
 
+        const tieneEvento = eventos.some(function (evento) {
 
+            const f = partesFecha(evento.fecha);
 
-        /*
-           Comprobar si existe un evento.
-        */
+            return (
+                f.anio === anioActual &&
+                f.mes === mesActual &&
+                f.dia === dia
+            );
 
-        const tieneEvento =
-            eventos.some(function (evento) {
-
-                const fecha =
-                    new Date(
-                        `${evento.fecha}T00:00:00`
-                    );
-
-
-                return (
-
-                    fecha.getFullYear() === anioActual &&
-
-                    fecha.getMonth() === mesActual &&
-
-                    fecha.getDate() === dia
-
-                );
-
-            });
-
+        });
 
         if (tieneEvento) {
 
-            elemento.classList.add(
-                "evento-dia"
-            );
+            elemento.classList.add("evento-dia");
 
+            const punto = document.createElement("span");
 
-            const punto =
-                document.createElement("span");
-
-
-            punto.className =
-                "punto-evento";
-
+            punto.className = "punto-evento";
 
             elemento.appendChild(punto);
 
         }
-
 
         calendario.appendChild(elemento);
 
@@ -796,590 +290,174 @@ function generarCalendario() {
 }
 
 
-
 /* =========================================
    CONTADORES DE LA BARRA LATERAL
    ========================================= */
 
 function actualizarContadoresMeses() {
 
-    const elementos =
-        document.querySelectorAll(
-            ".mes[data-mes]"
-        );
+    document.querySelectorAll(".mes[data-mes]").forEach(function (elemento) {
 
+        const mes = parseInt(elemento.dataset.mes);
 
-    elementos.forEach(function (elemento) {
+        const anio = parseInt(elemento.dataset.anio);
 
-        const mes =
-            parseInt(elemento.dataset.mes);
+        const cantidad = eventos.filter(function (evento) {
 
+            const f = partesFecha(evento.fecha);
 
-        const anio =
-            parseInt(elemento.dataset.anio);
+            return f.mes === mes && f.anio === anio;
 
+        }).length;
 
-        const cantidad =
-            eventos.filter(function (evento) {
-
-                const fecha =
-                    new Date(
-                        `${evento.fecha}T00:00:00`
-                    );
-
-
-                return (
-
-                    fecha.getMonth() === mes &&
-
-                    fecha.getFullYear() === anio
-
-                );
-
-            }).length;
-
-
-        const contador =
-            elemento.querySelector("small");
-
-
-        contador.textContent =
-            `${cantidad} ${
-                cantidad === 1
-                    ? "evento"
-                    : "eventos"
-            }`;
+        elemento.querySelector("small").textContent =
+            textoEventos(cantidad);
 
     });
 
 }
 
 
-
 /* =========================================
-   MOSTRAR FORMULARIO
+   FORMULARIO (mostrar / ocultar)
+   El guardado lo hace registrar.php
    ========================================= */
 
 function mostrarFormulario() {
 
-    /*
-       Siempre comenzamos con un formulario
-       completamente limpio.
-    */
+    document.getElementById("seccionEventos").style.display = "none";
 
-    eventoEditando = null;
+    document.getElementById("calendario").style.display = "none";
 
-    limpiarFormulario();
-
-
-    document.getElementById(
-        "tituloFormulario"
-    ).textContent =
-        "Agregar evento";
-
-
-    document.getElementById(
-        "descripcionFormulario"
-    ).textContent =
-        "Completa la información de tu nuevo evento.";
-
-
-    document.getElementById(
-        "botonGuardar"
-    ).textContent =
-        "Crear evento";
-
-
-    document.getElementById(
-        "seccionEventos"
-    ).style.display =
-        "none";
-
-
-    document.getElementById(
-        "calendario"
-    ).style.display =
-        "none";
-
-
-    document.getElementById(
-        "formularioEvento"
-    ).style.display =
-        "block";
+    document.getElementById("formularioEvento").style.display = "block";
 
 }
 
-
-
-/* =========================================
-   REGRESAR DEL FORMULARIO
-   ========================================= */
 
 function ocultarFormulario() {
 
-    /*
-       MUY IMPORTANTE:
+    document.getElementById("formularioEvento").style.display = "none";
 
-       Aquí NO guardamos nada.
+    document.getElementById("seccionEventos").style.display = "block";
 
-       Simplemente abandonamos el formulario.
-    */
-
-
-    eventoEditando = null;
-
-
-    /*
-       Vaciar todas las cajas.
-    */
-
-    limpiarFormulario();
-
-
-    /*
-       Ocultar formulario.
-    */
-
-    document.getElementById(
-        "formularioEvento"
-    ).style.display =
-        "none";
-
-
-    /*
-       Volver a mostrar eventos.
-    */
-
-    document.getElementById(
-        "seccionEventos"
-    ).style.display =
-        "block";
-
-
-    /*
-       Volver a mostrar calendario.
-    */
-
-    document.getElementById(
-        "calendario"
-    ).style.display =
-        "block";
+    document.getElementById("calendario").style.display = "block";
 
 }
 
 
-
 /* =========================================
-   LIMPIAR FORMULARIO
+   TEMA CLARO / OSCURO
+   (index.php ya puso data-theme antes de pintar)
    ========================================= */
 
-function limpiarFormulario() {
+const CLAVE_TEMA = "agendaweb_tema";
 
-    document.getElementById(
-        "titulo"
-    ).value = "";
+const selectorTema = document.getElementById("selectorTema");
 
 
-    document.getElementById(
-        "fecha"
-    ).value = "";
+function temaActual() {
 
-
-    document.getElementById(
-        "hora"
-    ).value = "";
-
-
-    document.getElementById(
-        "lugar"
-    ).value = "";
-
-
-    document.getElementById(
-        "categoria"
-    ).value = "";
-
-
-    document.getElementById(
-        "descripcion"
-    ).value = "";
+    return document.documentElement.getAttribute("data-theme") === "light"
+        ? "light"
+        : "dark";
 
 }
 
 
+function marcarSelector() {
 
-/* =========================================
-   GUARDAR EVENTO
-   ========================================= */
+    const oscuro = temaActual() === "dark";
 
-function guardarEvento() {
+    selectorTema.setAttribute("aria-checked", String(oscuro));
 
-    /*
-       Obtener valores.
-    */
+    selectorTema.setAttribute(
+        "aria-label",
+        oscuro ? "Tema oscuro activado" : "Tema claro activado"
+    );
 
-    const titulo =
-        document.getElementById(
-            "titulo"
-        ).value.trim();
+}
 
 
-    const fecha =
-        document.getElementById(
-            "fecha"
-        ).value;
+function cambiarTema() {
+
+    const raiz = document.documentElement;
+
+    const nuevo = temaActual() === "dark" ? "light" : "dark";
+
+    /* La transición solo existe durante el cambio */
+
+    raiz.classList.add("tema-transicion");
+
+    raiz.setAttribute("data-theme", nuevo);
+
+    try {
+
+        localStorage.setItem(CLAVE_TEMA, nuevo);
+
+    } catch (error) { /* sin almacenamiento: el tema sigue funcionando */ }
+
+    marcarSelector();
+
+    setTimeout(function () {
+
+        raiz.classList.remove("tema-transicion");
+
+    }, 400);
+
+}
 
 
-    const hora =
-        document.getElementById(
-            "hora"
-        ).value;
+selectorTema.addEventListener("click", cambiarTema);
+
+marcarSelector();
 
 
-    const lugar =
-        document.getElementById(
-            "lugar"
-        ).value.trim();
+/* Si el usuario nunca eligió, seguir al sistema operativo en vivo */
 
+window
+    .matchMedia("(prefers-color-scheme: light)")
+    .addEventListener("change", function (evento) {
 
-    const categoria =
-        document.getElementById(
-            "categoria"
-        ).value;
+        let guardado = null;
 
+        try { guardado = localStorage.getItem(CLAVE_TEMA); } catch (error) {}
 
-    const descripcion =
-        document.getElementById(
-            "descripcion"
-        ).value.trim();
+        if (guardado === "light" || guardado === "dark") {
 
-
-
-    /*
-       Validar.
-    */
-
-    if (
-
-        !titulo ||
-        !fecha ||
-        !hora ||
-        !lugar ||
-        !categoria ||
-        !descripcion
-
-    ) {
-
-        alert(
-            "Completa todos los campos antes de guardar el evento."
-        );
-
-        return;
-
-    }
-
-
-
-    /* =====================================
-       EDITAR EVENTO
-       ===================================== */
-
-    if (eventoEditando !== null) {
-
-        const evento =
-            eventos.find(function (evento) {
-
-                return evento.id === eventoEditando;
-
-            });
-
-
-        if (evento) {
-
-            evento.titulo =
-                titulo;
-
-            evento.fecha =
-                fecha;
-
-            evento.hora =
-                hora;
-
-            evento.lugar =
-                lugar;
-
-            evento.categoria =
-                categoria;
-
-            evento.descripcion =
-                descripcion;
+            return;
 
         }
 
-    }
-
-
-
-    /* =====================================
-       CREAR EVENTO
-       ===================================== */
-
-    else {
-
-        const nuevoEvento = {
-
-            id: Date.now(),
-
-            titulo: titulo,
-
-            fecha: fecha,
-
-            hora: hora,
-
-            lugar: lugar,
-
-            categoria: categoria,
-
-            descripcion: descripcion
-
-        };
-
-
-        eventos.push(
-            nuevoEvento
+        document.documentElement.setAttribute(
+            "data-theme",
+            evento.matches ? "light" : "dark"
         );
 
-    }
+        marcarSelector();
 
-
-
-    /*
-       Guardar.
-    */
-
-    guardarEventos();
-
-
-    /*
-       Actualizar interfaz.
-    */
-
-    actualizarInterfaz();
-
-
-    /*
-       Si el evento fue creado o editado
-       desde otro mes, mostramos el mes
-       donde quedó guardado.
-    */
-
-    const fechaEvento =
-        new Date(
-            `${fecha}T00:00:00`
-        );
-
-
-    mesActual =
-        fechaEvento.getMonth();
-
-
-    anioActual =
-        fechaEvento.getFullYear();
-
-
-    actualizarInterfaz();
-
-
-    /*
-       Regresar.
-    */
-
-    ocultarFormulario();
-
-}
-
+    });
 
 
 /* =========================================
-   EDITAR EVENTO
+   MENÚ DE MESES DESPLEGABLE
    ========================================= */
 
-function editarEvento(id) {
+const botonMeses = document.getElementById("botonMeses");
 
-    const evento =
-        eventos.find(function (evento) {
-
-            return evento.id === id;
-
-        });
+const barraLateral = document.querySelector(".barra-lateral");
 
 
-    if (!evento) {
+botonMeses.addEventListener("click", function () {
 
-        return;
+    const cerrado = barraLateral.classList.toggle("meses-cerrados");
 
-    }
+    botonMeses.setAttribute("aria-expanded", String(!cerrado));
 
-
-    /*
-       Guardar ID.
-    */
-
-    eventoEditando = id;
-
-
-    /*
-       Cargar datos.
-    */
-
-    document.getElementById(
-        "titulo"
-    ).value =
-        evento.titulo;
-
-
-    document.getElementById(
-        "fecha"
-    ).value =
-        evento.fecha;
-
-
-    document.getElementById(
-        "hora"
-    ).value =
-        evento.hora;
-
-
-    document.getElementById(
-        "lugar"
-    ).value =
-        evento.lugar;
-
-
-    document.getElementById(
-        "categoria"
-    ).value =
-        evento.categoria;
-
-
-    document.getElementById(
-        "descripcion"
-    ).value =
-        evento.descripcion;
-
-
-    /*
-       Cambiar textos.
-    */
-
-    document.getElementById(
-        "tituloFormulario"
-    ).textContent =
-        "Editar evento";
-
-
-    document.getElementById(
-        "descripcionFormulario"
-    ).textContent =
-        "Modifica la información de tu evento.";
-
-
-    document.getElementById(
-        "botonGuardar"
-    ).textContent =
-        "Guardar cambios";
-
-
-    /*
-       Mostrar formulario.
-    */
-
-    document.getElementById(
-        "seccionEventos"
-    ).style.display =
-        "none";
-
-
-    document.getElementById(
-        "calendario"
-    ).style.display =
-        "none";
-
-
-    document.getElementById(
-        "formularioEvento"
-    ).style.display =
-        "block";
-
-}
-
+});
 
 
 /* =========================================
-   BORRAR EVENTO
+   INICIAR
    ========================================= */
 
-function borrarEvento(id) {
-
-    const evento =
-        eventos.find(function (evento) {
-
-            return evento.id === id;
-
-        });
-
-
-    if (!evento) {
-
-        return;
-
-    }
-
-
-    const confirmar =
-        confirm(
-            `¿Quieres borrar el evento "${evento.titulo}"?`
-        );
-
-
-    if (!confirmar) {
-
-        return;
-
-    }
-
-
-    /*
-       Eliminar.
-    */
-
-    eventos =
-        eventos.filter(function (evento) {
-
-            return evento.id !== id;
-
-        });
-
-
-    /*
-       Guardar.
-    */
-
-    guardarEventos();
-
-
-    /*
-       Actualizar.
-    */
-
-    actualizarInterfaz();
-
-}
-
-
-
-/* =========================================
-   INICIAR AGENDAWEB
-   ========================================= */
-
-cargarEventos();
+actualizarInterfaz();

@@ -4,6 +4,96 @@ require_once "conexion.php";
 
 
 /* =========================================
+   FUNCIONES DE AYUDA
+   ========================================= */
+
+// Limpia un texto antes de mostrarlo (evita XSS)
+function e(?string $texto): string
+{
+    return htmlspecialchars($texto ?? '', ENT_QUOTES, 'UTF-8');
+}
+
+
+// 'estudio' -> 'Escuela'
+function nombreCategoria(string $clave): string
+{
+    $nombres = [
+        'trabajo'  => 'Trabajo',
+        'personal' => 'Personal',
+        'estudio'  => 'Escuela',
+        'ocio'     => 'Ocio',
+    ];
+
+    return $nombres[$clave] ?? $clave;
+}
+
+
+// '10:30:00' -> '10:30 AM'   |   '19:00:00' -> '7:00 PM'
+function formatearHora(string $hora): string
+{
+    return date('g:i A', strtotime($hora));
+}
+
+
+/* =========================================
+   TARJETA DE UN EVENTO
+   Recibe un evento (arreglo asociativo)
+   y devuelve el HTML de su tarjeta.
+   ========================================= */
+
+function mostrarEvento(array $ev): string
+{
+    $mesesCortos = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN',
+                    'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+
+    $marca = strtotime($ev['fecha']);
+    $dia   = (int) date('j', $marca);
+    $mes   = $mesesCortos[(int) date('n', $marca) - 1];
+
+    $id = (int) $ev['id'];   // el id SIEMPRE como número
+
+    // data-mes (0-11) y data-anio los usa script.js para filtrar por mes
+    $html  = '<article class="evento"'
+           . ' data-mes="' . ((int) date('n', $marca) - 1) . '"'
+           . ' data-anio="' . (int) date('Y', $marca) . '">';
+
+    $html .= '<div class="fecha">'
+           . '<span class="dia">' . $dia . '</span>'
+           . '<span class="mes-corto">' . $mes . '</span>'
+           . '</div>';
+
+    $html .= '<div class="informacion">';
+
+    if ($ev['hora']) {                       // la hora es opcional
+        $html .= '<span class="hora">' . e(formatearHora($ev['hora'])) . '</span>';
+    }
+
+    $html .= '<h3>' . e($ev['titulo']) . '</h3>';
+
+    if ($ev['descripcion']) {                // la descripción también
+        $html .= '<p>' . e($ev['descripcion']) . '</p>';
+    }
+
+    $html .= '<div class="datos">'
+           . '<span class="etiqueta ' . e($ev['categoria']) . '">'
+           . e(nombreCategoria($ev['categoria']))
+           . '</span></div>';
+
+    $html .= '</div>';
+
+    $html .= '<div class="acciones-evento">'
+           . '<a href="editar.php?id=' . $id . '" class="boton-editar">Editar</a>'
+           . '<form method="post" action="borrar.php">'
+           . '<input type="hidden" name="id" value="' . $id . '">'
+           . '<button type="submit" class="boton-borrar">Borrar</button>'
+           . '</form></div>';
+
+    return $html . '</article>';
+}
+
+
+
+/* =========================================
    OBTENER EVENTOS DE MYSQL
    ========================================= */
 
@@ -46,6 +136,21 @@ $conexion->close();
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
         rel="stylesheet">
 
+    <!-- TEMA: se aplica antes de pintar para evitar parpadeo -->
+
+    <script>
+        (function () {
+            var tema = null;
+            try { tema = localStorage.getItem("agendaweb_tema"); } catch (e) {}
+            if (tema !== "light" && tema !== "dark") {
+                tema = window.matchMedia("(prefers-color-scheme: light)").matches
+                    ? "light"
+                    : "dark";
+            }
+            document.documentElement.setAttribute("data-theme", tema);
+        })();
+    </script>
+
     <!-- CSS -->
 
     <link rel="stylesheet" href="estilos.css">
@@ -77,7 +182,26 @@ $conexion->close();
             </div>
 
 
-            <button
+            <div class="encabezado-acciones">
+
+                <!-- INTERRUPTOR DE TEMA -->
+
+                <button
+                    class="selector-tema"
+                    id="selectorTema"
+                    type="button"
+                    role="switch"
+                    aria-checked="true"
+                    aria-label="Tema oscuro"
+                    title="Cambiar entre tema claro y oscuro">
+
+                    <span class="selector-tema__icono selector-tema__icono--sol" aria-hidden="true">☀️</span>
+                    <span class="selector-tema__icono selector-tema__icono--luna" aria-hidden="true">🌙</span>
+                    <span class="selector-tema__perilla" aria-hidden="true"></span>
+
+                </button>
+
+                <button
                 class="boton-agregar"
                 type="button"
                 onclick="mostrarFormulario()">
@@ -85,6 +209,8 @@ $conexion->close();
                 + Agregar evento
 
             </button>
+
+            </div>
 
         </div>
 
@@ -106,28 +232,38 @@ $conexion->close();
         <aside class="barra-lateral">
 
 
-            <div class="titulo-meses">
+            <button
+                class="titulo-meses"
+                id="botonMeses"
+                type="button"
+                aria-expanded="true"
+                aria-controls="listaMeses">
 
-                <span class="icono-calendario">
-                    ▣
+                <span class="icono-calendario" aria-hidden="true">
+                    📅
                 </span>
 
+                <span class="titulo-meses-texto">
 
-                <div>
-
-                    <h2>
+                    <span class="titulo-meses-nombre">
                         Mis meses
-                    </h2>
+                    </span>
 
-                    <p>
+                    <span class="titulo-meses-rango">
                         2026 - 2027
-                    </p>
+                    </span>
 
-                </div>
+                </span>
 
-            </div>
+                <span class="indicador-meses" aria-hidden="true">
+                    ▼
+                </span>
 
+            </button>
 
+            <div class="meses-colapsable" id="listaMeses">
+
+            <div class="meses-interior">
 
             <div class="meses">
 
@@ -277,6 +413,10 @@ $conexion->close();
 
             </div>
 
+            </div>
+
+            </div>
+
         </aside>
 
 
@@ -364,13 +504,32 @@ $conexion->close();
 
 
 
-                <!-- AQUÍ SE GENERAN LOS EVENTOS -->
+                <!-- LISTA O ESTADO VACÍO, NUNCA LOS DOS -->
 
-                <div
-                    class="eventos"
-                    id="listaEventos">
+                <?php if (empty($eventos)): ?>
 
-                </div>
+                    <div class="sin-eventos">
+                        <h3>No tienes eventos registrados</h3>
+                        <p>Pulsa «+ Agregar evento» para crear el primero.</p>
+                    </div>
+
+                <?php else: ?>
+
+                    <div class="eventos" id="listaEventos">
+
+                        <?php foreach ($eventos as $ev): ?>
+                            <?= mostrarEvento($ev) ?>
+                        <?php endforeach; ?>
+
+                    </div>
+
+                    <!-- Lo muestra script.js cuando el mes elegido no tiene eventos -->
+                    <div class="sin-eventos" id="sinEventosMes" hidden>
+                        <h3>Sin eventos este mes</h3>
+                        <p>No hay eventos para este mes.</p>
+                    </div>
+
+                <?php endif; ?>
 
 
             </section>
@@ -695,7 +854,8 @@ $conexion->close();
             <?= json_encode(
                 $eventos,
                 JSON_UNESCAPED_UNICODE |
-                JSON_UNESCAPED_SLASHES
+                JSON_UNESCAPED_SLASHES |
+                JSON_HEX_TAG
             ) ?>;
 
     </script>

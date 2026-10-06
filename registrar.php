@@ -130,6 +130,10 @@ $sql = "
 ";
 
 
+// Hora y descripción son opcionales: vacío -> NULL en MySQL
+$hora = ($hora === "") ? null : $hora;
+$descripcion = ($descripcion === "") ? null : $descripcion;
+
 $stmt = $conexion->prepare($sql);
 
 $stmt->bind_param(
