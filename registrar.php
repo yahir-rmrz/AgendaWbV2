@@ -2,73 +2,157 @@
 
 require_once "conexion.php";
 
-// Verificar que el formulario fue enviado por POST
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: index.php");
     exit;
 }
 
-// Recibir los datos
+
+/* =========================================
+   RECIBIR DATOS
+   ========================================= */
+
 $titulo = trim($_POST["titulo"] ?? "");
 $fecha = trim($_POST["fecha"] ?? "");
 $hora = trim($_POST["hora"] ?? "");
-$lugar = trim($_POST["lugar"] ?? "");
 $categoria = trim($_POST["categoria"] ?? "");
 $descripcion = trim($_POST["descripcion"] ?? "");
 
-// Categorías permitidas
-$categoriasPermitidas = [
-    "personal",
+
+/* =========================================
+   VALIDAR
+   ========================================= */
+
+$errores = [];
+
+$categoriasOK = [
     "trabajo",
+    "personal",
     "estudio",
-    "otro"
+    "ocio"
 ];
 
-// Validar campos obligatorios
-if ($titulo === "" || $fecha === "" || $categoria === "") {
-    die("Error: faltan campos obligatorios.");
+
+if ($titulo === "") {
+
+    $errores["titulo"] =
+        "El título es obligatorio.";
+
+} elseif (mb_strlen($titulo) > 120) {
+
+    $errores["titulo"] =
+        "Máximo 120 caracteres.";
+
 }
 
-// Validar categoría
-if (!in_array($categoria, $categoriasPermitidas, true)) {
-    die("Error: categoría no válida.");
+
+if ($fecha === "") {
+
+    $errores["fecha"] =
+        "La fecha es obligatoria.";
+
+} else {
+
+    $fechaValida =
+        DateTime::createFromFormat(
+            "Y-m-d",
+            $fecha
+        );
+
+    if (
+        !$fechaValida ||
+        $fechaValida->format("Y-m-d") !== $fecha
+    ) {
+
+        $errores["fecha"] =
+            "La fecha no es válida.";
+
+    }
+
 }
 
-// Preparar la consulta
-$sql = "INSERT INTO eventos
-        (titulo, fecha, hora, lugar, categoria, descripcion)
-        VALUES (?, ?, ?, ?, ?, ?)";
+
+if (!in_array(
+    $categoria,
+    $categoriasOK,
+    true
+)) {
+
+    $errores["categoria"] =
+        "Elige una categoría válida.";
+
+}
+
+
+if (mb_strlen($descripcion) > 500) {
+
+    $errores["descripcion"] =
+        "Máximo 500 caracteres.";
+
+}
+
+
+/* =========================================
+   SI HAY ERRORES
+   ========================================= */
+
+if (!empty($errores)) {
+
+    $mensaje =
+        implode(
+            " ",
+            $errores
+        );
+
+    header(
+        "Location: index.php?error=" .
+        urlencode($mensaje)
+    );
+
+    exit;
+}
+
+
+/* =========================================
+   GUARDAR EN MYSQL
+   ========================================= */
+
+$sql = "
+    INSERT INTO eventos
+    (
+        titulo,
+        fecha,
+        hora,
+        categoria,
+        descripcion
+    )
+    VALUES (?, ?, ?, ?, ?)
+";
+
 
 $stmt = $conexion->prepare($sql);
 
-if (!$stmt) {
-    die("Error al preparar la consulta: " . $conexion->error);
-}
-
-// Vincular los datos
 $stmt->bind_param(
-    "ssssss",
+    "sssss",
     $titulo,
     $fecha,
     $hora,
-    $lugar,
     $categoria,
     $descripcion
 );
 
-// Ejecutar
-if ($stmt->execute()) {
+$stmt->execute();
 
-    // Redirigir al calendario después de guardar
-    header("Location: index.php?ok=1");
-    exit;
-
-} else {
-    die("Error al guardar el evento: " . $stmt->error);
-}
-
-// Cerrar
 $stmt->close();
+
 $conexion->close();
+
+
+/* =========================================
+   REDIRECCIÓN PRG
+   ========================================= */
+
+header("Location: index.php?ok=1");
+exit;
 
 ?>

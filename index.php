@@ -1,3 +1,32 @@
+<?php
+
+require_once "conexion.php";
+
+
+/* =========================================
+   OBTENER EVENTOS DE MYSQL
+   ========================================= */
+
+$sql = "
+    SELECT
+        id,
+        titulo,
+        fecha,
+        hora,
+        categoria,
+        descripcion
+    FROM eventos
+    ORDER BY fecha ASC, hora ASC
+";
+
+$resultado = $conexion->query($sql);
+
+$eventos = $resultado->fetch_all(MYSQLI_ASSOC);
+
+$conexion->close();
+
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -8,7 +37,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Fuentes -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
+
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link
@@ -16,6 +47,7 @@
         rel="stylesheet">
 
     <!-- CSS -->
+
     <link rel="stylesheet" href="estilos.css">
 
     <title>AgendaWeb</title>
@@ -257,6 +289,32 @@
 
 
             <!-- ========================= -->
+            <!-- MENSAJES -->
+            <!-- ========================= -->
+
+            <?php if (isset($_GET["ok"]) && $_GET["ok"] === "1"): ?>
+
+                <div class="mensaje-exito">
+                    Evento guardado correctamente.
+                </div>
+
+            <?php endif; ?>
+
+
+            <?php if (isset($_GET["error"])): ?>
+
+                <div class="mensaje-error">
+                    <?= htmlspecialchars(
+                        $_GET["error"],
+                        ENT_QUOTES,
+                        "UTF-8"
+                    ) ?>
+                </div>
+
+            <?php endif; ?>
+
+
+            <!-- ========================= -->
             <!-- EVENTOS -->
             <!-- ========================= -->
 
@@ -438,7 +496,14 @@
 
 
 
-                <div class="formulario">
+                <!-- ========================= -->
+                <!-- FORMULARIO PHP -->
+                <!-- ========================= -->
+
+                <form
+                    class="formulario"
+                    method="post"
+                    action="registrar.php">
 
 
                     <!-- TÍTULO -->
@@ -453,7 +518,10 @@
                         <input
                             type="text"
                             id="titulo"
-                            placeholder="Ej. Reunión de proyecto">
+                            name="titulo"
+                            placeholder="Ej. Reunión de proyecto"
+                            maxlength="120"
+                            required>
 
                     </div>
 
@@ -473,7 +541,9 @@
 
                             <input
                                 type="date"
-                                id="fecha">
+                                id="fecha"
+                                name="fecha"
+                                required>
 
                         </div>
 
@@ -488,28 +558,11 @@
 
                             <input
                                 type="time"
-                                id="hora">
+                                id="hora"
+                                name="hora">
 
                         </div>
 
-
-                    </div>
-
-
-
-                    <!-- LUGAR -->
-
-                    <div class="campo">
-
-                        <label for="lugar">
-                            Lugar
-                        </label>
-
-
-                        <input
-                            type="text"
-                            id="lugar"
-                            placeholder="Ej. Sala de juntas">
 
                     </div>
 
@@ -524,22 +577,29 @@
                         </label>
 
 
-                        <select id="categoria">
+                        <select
+                            id="categoria"
+                            name="categoria"
+                            required>
 
                             <option value="">
                                 Selecciona una categoría
                             </option>
 
-                            <option value="Trabajo">
+                            <option value="trabajo">
                                 Trabajo
                             </option>
 
-                            <option value="Escuela">
+                            <option value="estudio">
                                 Escuela
                             </option>
 
-                            <option value="Personal">
+                            <option value="personal">
                                 Personal
+                            </option>
+
+                            <option value="ocio">
+                                Ocio
                             </option>
 
                         </select>
@@ -559,7 +619,9 @@
 
                         <textarea
                             id="descripcion"
+                            name="descripcion"
                             rows="4"
+                            maxlength="500"
                             placeholder="Escribe una descripción del evento..."></textarea>
 
                     </div>
@@ -588,9 +650,7 @@
 
                         <button
                             class="boton-crear"
-                            type="button"
-                            id="botonGuardar"
-                            onclick="guardarEvento()">
+                            type="submit">
 
                             Crear evento
 
@@ -600,7 +660,7 @@
                     </div>
 
 
-                </div>
+                </form>
 
 
             </section>
@@ -625,6 +685,20 @@
 
     </footer>
 
+
+
+    <!-- EVENTOS DE MYSQL PARA JAVASCRIPT -->
+
+    <script>
+
+        const eventosDesdePHP =
+            <?= json_encode(
+                $eventos,
+                JSON_UNESCAPED_UNICODE |
+                JSON_UNESCAPED_SLASHES
+            ) ?>;
+
+    </script>
 
 
     <!-- JAVASCRIPT -->

@@ -1,21 +1,20 @@
 <?php
 
-$servidor = "localhost";
-$usuario = "root";
-$password = "123456";
-$baseDatos = "agenda";
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-$conexion = new mysqli(
-    $servidor,
-    $usuario,
-    $password,
-    $baseDatos
-);
+try {
 
-if ($conexion->connect_error) {
-    die("Error de conexión: " . $conexion->connect_error);
+    $conexion = new mysqli(
+        "HOST",
+        "USUARIO",
+        "CONTRASEÑA",
+        "sugary_bedroom_giy_db"
+    );
+
+    $conexion->set_charset("utf8mb4");
+
+} catch (mysqli_sql_exception $e) {
+
+    die("No se pudo conectar a la base de datos.");
+
 }
-
-$conexion->set_charset("utf8mb4");
-
-echo "Conexión correcta";
