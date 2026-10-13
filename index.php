@@ -1,4 +1,3 @@
-```php
 <?php
 
 require_once "conexion.php";
@@ -22,7 +21,8 @@ function formatearFecha(string $fecha): string
 }
 
 
-// 'estudio' -> 'Escuela'
+// Conservamos la función original para no eliminar
+// compatibilidad con las claves de categorías anteriores.
 function nombreCategoria(string $clave): string
 {
     $nombres = [
@@ -32,7 +32,7 @@ function nombreCategoria(string $clave): string
         'ocio'     => 'Ocio',
     ];
 
-    return $nombres[$clave] ?? $clave;
+    return $nombres[strtolower($clave)] ?? $clave;
 }
 
 
@@ -87,6 +87,28 @@ function mostrarEvento(array $ev): string
        data-anio:
        año del evento
     */
+
+    // En P5 la consulta obtiene el nombre de la categoría
+    // desde la tabla categorias.
+    $categoriaNombre = $ev['categoria'];
+
+    // Conservamos las clases CSS de las categorías originales.
+    $categoriaClase = strtolower(
+        preg_replace('/[^a-zA-Z0-9_-]/', '', $categoriaNombre)
+    );
+
+    if (strpos(strtolower($categoriaNombre), 'trabajo') !== false) {
+        $categoriaClase = 'trabajo';
+    } elseif (strpos(strtolower($categoriaNombre), 'personal') !== false) {
+        $categoriaClase = 'personal';
+    } elseif (
+        strpos(strtolower($categoriaNombre), 'estudio') !== false ||
+        strpos(strtolower($categoriaNombre), 'escuela') !== false
+    ) {
+        $categoriaClase = 'estudio';
+    } elseif (strpos(strtolower($categoriaNombre), 'ocio') !== false) {
+        $categoriaClase = 'ocio';
+    }
 
     $html =
         '<article class="evento"'
@@ -145,13 +167,13 @@ function mostrarEvento(array $ev): string
     }
 
 
-    // Categoría
+    // Categoría obtenida desde la tabla categorias
     $html .=
         '<div class="datos">'
         . '<span class="etiqueta '
-        . e($ev['categoria'])
+        . e($categoriaClase)
         . '">'
-        . e(nombreCategoria($ev['categoria']))
+        . e(nombreCategoria($categoriaNombre))
         . '</span>'
         . '</div>';
 
@@ -192,34 +214,63 @@ function mostrarEvento(array $ev): string
 
 
 /* =========================================
-   OBTENER EVENTOS DE MYSQL
+   OBTENER EVENTOS DE MYSQL - P5
    ========================================= */
 
+// INNER JOIN relaciona cada evento con su categoría.
 $resultado = $conexion->query(
-    'SELECT id, titulo, fecha, hora, categoria, descripcion
-       FROM eventos
-      ORDER BY fecha, hora'
+    'SELECT e.id, e.titulo, e.fecha, e.hora,
+            e.categoria_id, e.descripcion,
+            c.nombre AS categoria
+       FROM eventos e
+       INNER JOIN categorias c
+               ON c.id = e.categoria_id
+      ORDER BY e.fecha, e.hora'
 );
 
 
 /*
    MySQL devuelve un arreglo de arreglos asociativos.
 
-   Ejemplo:
-
-   [
-       [
-           'id' => 1,
-           'titulo' => 'Reunión',
-           'fecha' => '2026-10-08',
-           'hora' => '10:30:00',
-           'categoria' => 'trabajo',
-           'descripcion' => 'Revisar calificaciones'
-       ]
-   ]
+   Ahora el nombre de la categoría se obtiene de la
+   tabla categorias, en lugar de eventos.categoria.
 */
 
 $eventos = $resultado->fetch_all(MYSQLI_ASSOC);
+
+
+/* =========================================
+   RESUMEN DE EVENTOS POR CATEGORÍA - P5
+   ========================================= */
+
+// LEFT JOIN permite mostrar también las categorías
+// que todavía no tienen eventos registrados.
+$resultadoResumen = $conexion->query(
+    'SELECT c.id, c.nombre, COUNT(e.id) AS total
+       FROM categorias c
+       LEFT JOIN eventos e
+              ON e.categoria_id = c.id
+      GROUP BY c.id, c.nombre
+      ORDER BY c.nombre'
+);
+
+$resumenCategorias = $resultadoResumen->fetch_all(MYSQLI_ASSOC);
+
+
+/* =========================================
+   OBTENER CATEGORÍAS PARA EL FORMULARIO - P5
+   ========================================= */
+
+// Las opciones se cargan desde MySQL.
+// Si agregas una categoría, aparecerá automáticamente.
+$resultadoCategorias = $conexion->query(
+    'SELECT id, nombre
+       FROM categorias
+      ORDER BY nombre'
+);
+
+$categorias = $resultadoCategorias->fetch_all(MYSQLI_ASSOC);
+
 
 $conexion->close();
 
@@ -611,6 +662,46 @@ $conexion->close();
 
 
             <!-- ========================= -->
+            <!-- RESUMEN DE CATEGORÍAS - P5 -->
+            <!-- ========================= -->
+
+            <section class="resumen-categorias">
+
+                <div class="titulo-seccion">
+
+                    <div>
+
+                        <span class="subtitulo">
+                            ORGANIZACIÓN
+                        </span>
+
+                        <h2>
+                            Eventos por categoría
+                        </h2>
+
+                    </div>
+
+                </div>
+
+                <div class="resumen">
+
+                    <?php foreach ($resumenCategorias as $cat): ?>
+
+                        <span class="etiqueta">
+
+                            <?= e($cat['nombre']) ?>:
+                            <?= (int) $cat['total'] ?>
+
+                        </span>
+
+                    <?php endforeach; ?>
+
+                </div>
+
+            </section>
+
+
+            <!-- ========================= -->
             <!-- EVENTOS -->
             <!-- ========================= -->
 
@@ -880,37 +971,33 @@ $conexion->close();
                     </div>
 
 
+                    <!-- CATEGORÍAS DINÁMICAS - P5 -->
+
                     <div class="campo">
 
-                        <label for="categoria">
+                        <label for="categoria_id">
                             Categoría
                         </label>
 
 
                         <select
-                            id="categoria"
-                            name="categoria"
+                            id="categoria_id"
+                            name="categoria_id"
                             required>
 
                             <option value="">
                                 Selecciona una categoría
                             </option>
 
-                            <option value="trabajo">
-                                Trabajo
-                            </option>
+                            <?php foreach ($categorias as $cat): ?>
 
-                            <option value="estudio">
-                                Escuela
-                            </option>
+                                <option value="<?= (int) $cat['id'] ?>">
 
-                            <option value="personal">
-                                Personal
-                            </option>
+                                    <?= e($cat['nombre']) ?>
 
-                            <option value="ocio">
-                                Ocio
-                            </option>
+                                </option>
+
+                            <?php endforeach; ?>
 
                         </select>
 
@@ -994,7 +1081,10 @@ $conexion->close();
                 $eventos,
                 JSON_UNESCAPED_UNICODE |
                 JSON_UNESCAPED_SLASHES |
-                JSON_HEX_TAG
+                JSON_HEX_TAG |
+                JSON_HEX_AMP |
+                JSON_HEX_APOS |
+                JSON_HEX_QUOT
             ) ?>;
 
     </script>
@@ -1008,4 +1098,3 @@ $conexion->close();
 </body>
 
 </html>
-```
