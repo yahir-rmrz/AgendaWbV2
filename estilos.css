@@ -11,10 +11,8 @@
 /* ========================= */
 
 :root {
-
     --fuente-titulo: 'Poppins', sans-serif;
     --fuente-cuerpo: 'Inter', sans-serif;
-
 }
 
 
@@ -68,40 +66,40 @@
 
 
 /* ========================= */
-/* TEMA CLARO (corporativo)  */
+/* TEMA CLARO (azul / índigo) */
 /* ========================= */
 
 [data-theme="light"] {
 
     color-scheme: light;
 
-    --fondo: #F2F2EE;
+    --fondo: #EEF2F8;
     --superficie: #FFFFFF;
-    --tarjeta: #FAFAF7;
-    --borde: #C8C9C5;
+    --tarjeta: #F8FAFD;
+    --borde: #D3DBE8;
 
-    --texto-principal: #17181C;
-    --texto-secundario: #5F6268;
+    --texto-principal: #12182B;
+    --texto-secundario: #5A6478;
 
-    --acento: #F5E500;
-    --acento-hover: #D9CA00;
-    --acento-texto: #6F6600;          /* amarillo oscurecido para leer sobre claro */
-    --texto-sobre-acento: #17181C;
+    --acento: #4F46E5;
+    --acento-hover: #4338CA;
+    --acento-texto: #4338CA;          /* índigo oscuro para leer sobre claro */
+    --texto-sobre-acento: #FFFFFF;
 
-    --info: #0099B5;
-    --info-texto: #007A93;
-    --magenta: #D60068;
-    --magenta-texto: #B8005A;
-    --error: #D91E36;
+    --info: #0E9FB0;
+    --info-texto: #0B7C8A;
+    --magenta: #DB2777;
+    --magenta-texto: #BE185D;
+    --error: #DC2626;
 
-    --acento-suave: rgba(245, 229, 0, 0.28);
+    --acento-suave: rgba(79, 70, 229, 0.12);
     --campo-bg: #FFFFFF;
-    --hover-bg: rgba(23, 24, 28, 0.05);
+    --hover-bg: rgba(18, 24, 43, 0.05);
 
-    --sombra-tarjeta: 0 4px 14px rgba(23, 24, 28, 0.08);
-    --sombra-panel: 0 1px 3px rgba(23, 24, 28, 0.06);
-    --glow: 0 1px 3px rgba(23, 24, 28, 0.18);
-    --anillo-foco: 0 0 0 3px rgba(0, 153, 181, 0.20);
+    --sombra-tarjeta: 0 4px 14px rgba(40, 55, 110, 0.12);
+    --sombra-panel: 0 1px 3px rgba(40, 55, 110, 0.08);
+    --glow: 0 2px 8px rgba(79, 70, 229, 0.28);
+    --anillo-foco: 0 0 0 3px rgba(79, 70, 229, 0.25);
 
     /* Light: esquinas suaves, aire corporativo */
     --radio-sm: 8px;
@@ -125,15 +123,10 @@
 
 
 body {
-
     margin: 0;
-
     background-color: var(--fondo);
-
     color: var(--texto-principal);
-
     font-family: var(--fuente-cuerpo);
-
 }
 
 
@@ -152,11 +145,8 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 .mes:focus-visible {
-
     outline: 2px solid var(--info);
-
     outline-offset: 2px;
-
 }
 
 
@@ -165,13 +155,11 @@ textarea:focus-visible,
 html.tema-transicion *,
 html.tema-transicion *::before,
 html.tema-transicion *::after {
-
     transition:
         background-color 0.3s ease,
         color 0.3s ease,
         border-color 0.3s ease,
         box-shadow 0.3s ease !important;
-
 }
 
 
@@ -180,69 +168,43 @@ html.tema-transicion *::after {
 /* ========================= */
 
 header {
-
     background-color: var(--superficie);
-
     border-bottom: 1px solid var(--borde);
-
     box-shadow: inset 0 -1px 0 transparent;
-
     border-top: var(--linea-header);
-
 }
 
 
 .encabezado {
-
     max-width: 1250px;
-
     margin: auto;
-
     padding: 25px 30px;
-
     display: flex;
-
     justify-content: space-between;
-
     align-items: center;
-
     gap: 20px;
-
 }
 
 
 .encabezado h1 {
-
     margin: 0;
-
     color: var(--acento-texto);
-
     font-family: var(--fuente-titulo);
-
     font-size: 30px;
-
     letter-spacing: 0.5px;
-
 }
 
 
 .encabezado p {
-
     margin: 5px 0 0;
-
     color: var(--texto-secundario);
-
 }
 
 
 .encabezado-acciones {
-
     display: flex;
-
     align-items: center;
-
     gap: 16px;
-
 }
 
 
@@ -251,49 +213,30 @@ header {
 /* ========================= */
 
 .selector-tema {
-
     position: relative;
-
     width: 64px;
-
     height: 32px;
-
     padding: 0;
-
     flex-shrink: 0;
-
     background-color: var(--campo-bg);
-
     border: 1px solid var(--borde);
-
     border-radius: var(--radio-switch);
-
     cursor: pointer;
-
 }
 
 
 .selector-tema:hover {
-
     border-color: var(--acento);
-
 }
 
 
 .selector-tema__icono {
-
     position: absolute;
-
     top: 50%;
-
     transform: translateY(-50%);
-
     font-size: 13px;
-
     line-height: 1;
-
     opacity: 0.55;
-
 }
 
 
@@ -308,37 +251,22 @@ header {
 
 
 .selector-tema__perilla {
-
     position: absolute;
-
     top: 3px;
-
     left: 3px;
-
     width: 24px;
-
     height: 24px;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     background-color: var(--acento);
-
     border-radius: var(--radio-perilla);
-
     box-shadow: var(--glow);
-
     font-size: 13px;
-
     line-height: 1;
-
     transition:
         transform 0.25s ease,
         background-color 0.3s ease !important;
-
 }
 
 
@@ -362,42 +290,79 @@ header {
 
 
 /* ========================= */
+/* ACCESO (icono + Iniciar)  */
+/* ========================= */
+
+.acceso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+
+.acceso-icono {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--acento-suave);
+    border: 1px solid var(--borde);
+    border-radius: 50%;
+    color: var(--acento-texto);
+}
+
+
+.acceso-icono svg {
+    width: 20px;
+    height: 20px;
+}
+
+
+.boton-iniciar {
+    background-color: transparent;
+    color: var(--texto-principal);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-sm);
+    padding: 5px 16px;
+    font-family: var(--fuente-cuerpo);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+
+.boton-iniciar:hover {
+    background-color: var(--acento-suave);
+    border-color: var(--acento);
+    color: var(--acento-texto);
+}
+
+
+/* ========================= */
 /* BOTÓN AGREGAR */
 /* ========================= */
 
 .boton-agregar {
-
     background-color: var(--acento);
-
     color: var(--texto-sobre-acento);
-
     border: 1px solid var(--acento);
-
     border-radius: var(--radio-sm);
-
     padding: 13px 20px;
-
     font-family: var(--fuente-cuerpo);
-
     font-weight: 700;
-
     font-size: 14px;
-
     cursor: pointer;
-
     box-shadow: var(--glow);
-
     transition: 0.2s;
-
 }
 
 
 .boton-agregar:hover {
-
     background-color: var(--acento-hover);
-
     border-color: var(--acento-hover);
-
 }
 
 
@@ -406,19 +371,12 @@ header {
 /* ========================= */
 
 .contenedor {
-
     max-width: 1250px;
-
     margin: 35px auto;
-
     padding: 0 30px;
-
     display: grid;
-
     grid-template-columns: 270px 1fr;
-
     gap: 30px;
-
 }
 
 
@@ -427,301 +385,191 @@ header {
 /* ========================= */
 
 .barra-lateral {
-
     background-color: var(--superficie);
-
     border: 1px solid var(--borde);
-
     border-radius: var(--radio-md);
-
     box-shadow: var(--sombra-panel);
-
     padding: 22px;
-
     height: fit-content;
-
     position: sticky;
-
     top: 20px;
-
 }
 
 
 /* Encabezado del menú: ahora es un botón */
 
 .titulo-meses {
-
     width: 100%;
-
     display: flex;
-
     align-items: center;
-
     gap: 13px;
-
     padding: 0 0 20px;
-
     margin-bottom: 15px;
-
     background: none;
-
     border: none;
-
     border-bottom: 1px solid var(--borde);
-
     border-radius: 0;
-
     color: inherit;
-
     font: inherit;
-
     text-align: left;
-
     cursor: pointer;
-
     transition:
         padding-bottom 0.25s ease,
         margin-bottom 0.25s ease,
         border-color 0.25s ease;
-
 }
 
 
 .titulo-meses:hover .titulo-meses-nombre {
-
     color: var(--acento-texto);
-
 }
 
 
 .icono-calendario {
-
     width: 45px;
-
     height: 45px;
-
     flex-shrink: 0;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
     background-color: var(--acento-suave);
-
     border: 1px solid var(--borde);
-
     border-radius: var(--radio-sm);
-
     font-size: 20px;
-
 }
 
 
 .titulo-meses-texto {
-
     flex: 1;
-
     min-width: 0;
-
 }
 
 
 .titulo-meses-nombre {
-
     display: block;
-
     font-family: var(--fuente-titulo);
-
     font-size: 19px;
-
     font-weight: 600;
-
     transition: color 0.2s;
-
 }
 
 
 .titulo-meses-rango {
-
     display: block;
-
     margin-top: 3px;
-
     color: var(--texto-secundario);
-
     font-size: 12px;
-
 }
 
 
 /* ▼ cerrado  ·  ▲ abierto (gira 180°) */
 
 .indicador-meses {
-
     flex-shrink: 0;
-
     color: var(--acento-texto);
-
     font-size: 12px;
-
     transition: transform 0.25s ease;
-
 }
 
 
 .titulo-meses[aria-expanded="true"] .indicador-meses {
-
     transform: rotate(180deg);
-
 }
 
 
 /* Contenido que se expande / contrae suavemente */
 
 .meses-colapsable {
-
     display: grid;
-
     grid-template-rows: 1fr;
-
     visibility: visible;
-
     transition:
         grid-template-rows 0.25s ease,
         visibility 0s linear 0s;
-
 }
 
 
 .meses-interior {
-
     min-height: 0;
-
     overflow: hidden;
-
 }
 
 
 .barra-lateral.meses-cerrados .meses-colapsable {
-
     grid-template-rows: 0fr;
-
     visibility: hidden;
-
     transition:
         grid-template-rows 0.25s ease,
         visibility 0s linear 0.25s;
-
 }
 
 
 .barra-lateral.meses-cerrados .titulo-meses {
-
     padding-bottom: 0;
-
     margin-bottom: 0;
-
     border-bottom-color: transparent;
-
 }
 
 
 .meses {
-
     display: flex;
-
     flex-direction: column;
-
     gap: 8px;
-
 }
 
 
 .mes {
-
     padding: 14px 12px;
-
     border-radius: var(--radio-sm);
-
     display: grid;
-
     grid-template-columns: 45px 1fr;
-
     align-items: center;
-
     cursor: pointer;
-
     transition: 0.2s;
-
 }
 
 
 .mes:hover {
-
     background-color: var(--hover-bg);
-
     transform: translateX(3px);
-
 }
 
 
 .mes > span {
-
     color: var(--texto-secundario);
-
     font-size: 11px;
-
     font-weight: 700;
-
     letter-spacing: 0.5px;
-
 }
 
 
 .mes strong {
-
     font-family: var(--fuente-titulo);
-
     font-size: 14px;
-
 }
 
 
 .mes small {
-
     grid-column: 2;
-
     color: var(--texto-secundario);
-
     font-size: 11px;
-
     margin-top: 2px;
-
 }
 
 
 /* MES SELECCIONADO */
 
 .mes.seleccionado {
-
     background-color: var(--acento);
-
     color: var(--texto-sobre-acento);
-
     box-shadow: var(--glow);
-
 }
 
 
 .mes.seleccionado > span,
 .mes.seleccionado small {
-
     color: var(--texto-sobre-acento);
-
     opacity: 0.75;
-
 }
 
 
@@ -730,67 +578,42 @@ header {
 /* ========================= */
 
 .titulo-seccion {
-
     display: flex;
-
     justify-content: space-between;
-
     align-items: flex-end;
-
     margin-bottom: 22px;
-
 }
 
 
 .subtitulo {
-
     color: var(--acento-texto);
-
     font-size: 11px;
-
     font-weight: 700;
-
     letter-spacing: 1px;
-
 }
 
 
 .titulo-seccion h2 {
-
     margin: 5px 0 3px;
-
     font-family: var(--fuente-titulo);
-
     font-size: 28px;
-
 }
 
 
 .titulo-seccion p {
-
     margin: 0;
-
     color: var(--texto-secundario);
-
 }
 
 
 .contador {
-
     background-color: var(--acento-suave);
-
     color: var(--acento-texto);
-
     border: 1px solid var(--borde);
-
     padding: 8px 13px;
-
     border-radius: var(--radio-pill);
-
     font-size: 12px;
-
     font-weight: 600;
-
 }
 
 
@@ -799,53 +622,33 @@ header {
 /* ========================= */
 
 .eventos {
-
     display: flex;
-
     flex-direction: column;
-
     gap: 15px;
-
 }
 
 
 .evento {
-
     background-color: var(--tarjeta);
-
     border: 1px solid var(--borde);
-
     /* La barra comienza invisible. */
-
     border-left: 5px solid transparent;
-
     border-radius: var(--radio-md);
-
     box-shadow: var(--sombra-panel);
-
     padding: 20px;
-
     display: flex;
-
     align-items: center;
-
     gap: 20px;
-
     transition: 0.2s;
-
 }
 
 
-/* La barra amarilla solo aparece al pasar el mouse */
+/* La barra de acento solo aparece al pasar el mouse */
 
 .evento:hover {
-
     border-left-color: var(--acento);
-
     transform: translateY(-2px);
-
     box-shadow: var(--sombra-tarjeta);
-
 }
 
 
@@ -854,41 +657,26 @@ header {
 /* ========================= */
 
 .fecha {
-
     min-width: 75px;
-
     text-align: center;
-
     border-right: 1px solid var(--borde);
-
     padding-right: 20px;
-
 }
 
 
 .dia {
-
     display: block;
-
     font-family: var(--fuente-titulo);
-
     font-size: 32px;
-
     color: var(--acento-texto);
-
 }
 
 
 .mes-corto {
-
     display: block;
-
     color: var(--texto-secundario);
-
     font-size: 11px;
-
     font-weight: 700;
-
 }
 
 
@@ -897,63 +685,40 @@ header {
 /* ========================= */
 
 .informacion {
-
     flex: 1;
-
     min-width: 0;
-
 }
 
 
 .hora {
-
     color: var(--info-texto);
-
     font-size: 12px;
-
     font-weight: 600;
-
 }
 
 
 .informacion h3 {
-
     margin: 4px 0;
-
     font-family: var(--fuente-titulo);
-
     font-size: 18px;
-
     overflow-wrap: anywhere;
-
 }
 
 
 .informacion p {
-
     margin: 0 0 10px;
-
     color: var(--texto-secundario);
-
     font-size: 13px;
-
     overflow-wrap: anywhere;
-
 }
 
 
 .datos {
-
     display: flex;
-
     align-items: center;
-
     gap: 12px;
-
     color: var(--texto-secundario);
-
     font-size: 12px;
-
 }
 
 
@@ -962,62 +727,40 @@ header {
 /* ========================= */
 
 .etiqueta {
-
     padding: 5px 10px;
-
     border: 1px solid transparent;
-
     border-radius: var(--radio-pill);
-
     font-size: 11px;
-
     font-weight: 600;
-
 }
 
 
 .trabajo {
-
     background-color: color-mix(in srgb, var(--info) 14%, transparent);
-
     border-color: color-mix(in srgb, var(--info) 40%, transparent);
-
     color: var(--info-texto);
-
 }
 
 
 .estudio,
 .escuela {
-
     background-color: var(--acento-suave);
-
     border-color: color-mix(in srgb, var(--acento) 45%, transparent);
-
     color: var(--acento-texto);
-
 }
 
 
 .personal {
-
     background-color: var(--hover-bg);
-
     border-color: var(--borde);
-
     color: var(--texto-secundario);
-
 }
 
 
 .ocio {
-
     background-color: color-mix(in srgb, var(--magenta) 14%, transparent);
-
     border-color: color-mix(in srgb, var(--magenta) 40%, transparent);
-
     color: var(--magenta-texto);
-
 }
 
 
@@ -1026,90 +769,57 @@ header {
 /* ========================= */
 
 .acciones-evento {
-
     display: flex;
-
     gap: 8px;
-
     margin-left: auto;
-
     flex-shrink: 0;
-
 }
 
 
 .acciones-evento form {
-
     margin: 0;
-
     display: flex;
-
 }
 
 
 .acciones-evento button,
 .acciones-evento a {
-
     display: inline-block;
-
     border: 1px solid transparent;
-
     padding: 8px 12px;
-
     border-radius: var(--radio-sm);
-
     font-family: var(--fuente-cuerpo);
-
     font-size: 12px;
-
     font-weight: 600;
-
     text-decoration: none;
-
     cursor: pointer;
-
     transition: 0.2s;
-
 }
 
 
 .boton-editar {
-
     background-color: color-mix(in srgb, var(--info) 14%, transparent);
-
     border-color: color-mix(in srgb, var(--info) 40%, transparent) !important;
-
     color: var(--info-texto);
-
 }
 
 
 .boton-editar:hover {
-
     background-color: color-mix(in srgb, var(--info) 26%, transparent);
-
 }
 
 
 .boton-borrar {
-
     background-color: var(--hover-bg);
-
     border-color: var(--borde) !important;
-
     color: var(--texto-secundario);
-
 }
 
 
 .boton-borrar:hover {
-
     background-color: color-mix(in srgb, var(--error) 14%, transparent);
-
     border-color: var(--error) !important;
-
     color: var(--error);
-
 }
 
 
@@ -1118,35 +828,23 @@ header {
 /* ========================= */
 
 .sin-eventos {
-
     background-color: var(--tarjeta);
-
     border: 1px dashed var(--borde);
-
     border-radius: var(--radio-md);
-
     padding: 40px;
-
     text-align: center;
-
 }
 
 
 .sin-eventos h3 {
-
     margin: 0 0 8px;
-
     font-family: var(--fuente-titulo);
-
 }
 
 
 .sin-eventos p {
-
     margin: 0;
-
     color: var(--texto-secundario);
-
 }
 
 
@@ -1156,39 +854,25 @@ header {
 
 .mensaje-exito,
 .mensaje-error {
-
     padding: 13px 16px;
-
     border-radius: var(--radio-sm);
-
     margin-bottom: 20px;
-
     font-size: 14px;
-
     border: 1px solid;
-
 }
 
 
 .mensaje-exito {
-
     background-color: color-mix(in srgb, var(--info) 12%, transparent);
-
     border-color: color-mix(in srgb, var(--info) 45%, transparent);
-
     color: var(--info-texto);
-
 }
 
 
 .mensaje-error {
-
     background-color: color-mix(in srgb, var(--error) 12%, transparent);
-
     border-color: color-mix(in srgb, var(--error) 50%, transparent);
-
     color: var(--error);
-
 }
 
 
@@ -1197,201 +881,125 @@ header {
 /* ========================= */
 
 .calendario {
-
     margin-top: 40px;
-
     background-color: var(--superficie);
-
     border: 1px solid var(--borde);
-
     border-radius: var(--radio-md);
-
     box-shadow: var(--sombra-panel);
-
     padding: 28px;
-
 }
 
 
 .titulo-calendario {
-
     display: flex;
-
     justify-content: space-between;
-
     align-items: center;
-
     margin-bottom: 25px;
-
 }
 
 
 .titulo-calendario h2 {
-
     margin: 5px 0 0;
-
     font-family: var(--fuente-titulo);
-
     font-size: 23px;
-
 }
 
 
 .navegacion {
-
     display: flex;
-
     gap: 8px;
-
 }
 
 
 .navegacion button {
-
     width: 38px;
-
     height: 38px;
-
     background-color: var(--campo-bg);
-
     color: var(--texto-principal);
-
     border: 1px solid var(--borde);
-
     border-radius: var(--radio-sm);
-
     cursor: pointer;
-
     font-size: 17px;
-
     transition: 0.2s;
-
 }
 
 
 .navegacion button:hover {
-
     border-color: var(--acento);
-
     color: var(--acento-texto);
-
 }
 
 
 .dias-semana {
-
     display: grid;
-
     grid-template-columns: repeat(7, 1fr);
-
     text-align: center;
-
     margin-bottom: 8px;
-
     color: var(--texto-secundario);
-
     font-size: 12px;
-
     font-weight: 600;
-
 }
 
 
 .dias {
-
     display: grid;
-
     grid-template-columns: repeat(7, 1fr);
-
     gap: 5px;
-
 }
 
 
 .dias > div {
-
     min-height: 55px;
-
     display: flex;
-
     justify-content: center;
-
     align-items: center;
-
     border-radius: var(--radio-sm);
-
     font-size: 14px;
-
     cursor: pointer;
-
     position: relative;
-
 }
 
 
 .dias > div:not(.dia-vacio):hover {
-
     background-color: var(--hover-bg);
-
 }
 
 
 .dias .dia-vacio {
-
     cursor: default;
-
 }
 
 
 .dias .hoy {
-
     background-color: var(--acento);
-
     color: var(--texto-sobre-acento);
-
     font-weight: 700;
-
     box-shadow: var(--glow);
-
 }
 
 
 .dias .evento-dia {
-
     background-color: var(--acento-suave);
-
     color: var(--acento-texto);
-
     font-weight: 600;
-
 }
 
 
 /* Si el día es hoy y también tiene evento, conserva el estilo de hoy. */
 
 .dias .hoy.evento-dia {
-
     background-color: var(--acento);
-
     color: var(--texto-sobre-acento);
-
 }
 
 
 .punto-evento {
-
     width: 4px;
-
     height: 4px;
-
     background-color: currentColor;
-
     border-radius: 50%;
-
     position: absolute;
-
     bottom: 7px;
-
 }
 
 
@@ -1400,147 +1008,95 @@ header {
 /* ========================= */
 
 .formulario-evento {
-
     display: none;
-
     background-color: var(--superficie);
-
     border: 1px solid var(--borde);
-
     border-radius: var(--radio-md);
-
     box-shadow: var(--sombra-panel);
-
     padding: 35px;
-
     max-width: 800px;
-
     margin: 0 auto;
-
 }
 
 
 .titulo-formulario {
-
     margin-bottom: 30px;
-
 }
 
 
 .titulo-formulario h2 {
-
     margin: 5px 0;
-
     font-family: var(--fuente-titulo);
-
     font-size: 28px;
-
 }
 
 
 .titulo-formulario p {
-
     margin: 0;
-
     color: var(--texto-secundario);
-
 }
 
 
 .formulario {
-
     display: flex;
-
     flex-direction: column;
-
     gap: 20px;
-
 }
 
 
 .campo {
-
     display: flex;
-
     flex-direction: column;
-
     gap: 7px;
-
 }
 
 
 .campo label {
-
     font-size: 13px;
-
     font-weight: 600;
-
     color: var(--texto-principal);
-
 }
 
 
 .campo input,
 .campo select,
 .campo textarea {
-
     width: 100%;
-
     padding: 12px 13px;
-
     border: 1px solid var(--borde);
-
     border-radius: var(--radio-sm);
-
     background-color: var(--campo-bg);
-
     color: var(--texto-principal);
-
     font-family: var(--fuente-cuerpo);
-
     font-size: 14px;
-
     outline: none;
-
 }
 
 
 .campo input::placeholder,
 .campo textarea::placeholder {
-
     color: var(--texto-secundario);
-
     opacity: 0.8;
-
 }
 
 
 .campo input:focus,
 .campo select:focus,
 .campo textarea:focus {
-
     border-color: var(--acento);
-
     box-shadow: var(--anillo-foco);
-
 }
 
 
 .fila-formulario {
-
     display: grid;
-
     grid-template-columns: 1fr 1fr;
-
     gap: 18px;
-
 }
 
 
 .campo textarea {
-
     resize: vertical;
-
 }
 
 
@@ -1549,85 +1105,51 @@ header {
 /* ========================= */
 
 .botones-formulario {
-
     display: flex;
-
     justify-content: flex-end;
-
     gap: 10px;
-
     margin-top: 10px;
-
     padding-top: 20px;
-
     border-top: 1px solid var(--borde);
-
 }
 
 
 .boton-cancelar {
-
     background-color: transparent;
-
     color: var(--texto-principal);
-
     border: 1px solid var(--borde);
-
     padding: 11px 18px;
-
     border-radius: var(--radio-sm);
-
     font-family: var(--fuente-cuerpo);
-
     font-weight: 600;
-
     cursor: pointer;
-
     transition: 0.2s;
-
 }
 
 
 .boton-cancelar:hover {
-
     background-color: var(--hover-bg);
-
     border-color: var(--texto-secundario);
-
 }
 
 
 .boton-crear {
-
     background-color: var(--acento);
-
     color: var(--texto-sobre-acento);
-
     border: 1px solid var(--acento);
-
     padding: 11px 20px;
-
     border-radius: var(--radio-sm);
-
     font-family: var(--fuente-cuerpo);
-
     font-weight: 700;
-
     cursor: pointer;
-
     box-shadow: var(--glow);
-
     transition: 0.2s;
-
 }
 
 
 .boton-crear:hover {
-
     background-color: var(--acento-hover);
-
     border-color: var(--acento-hover);
-
 }
 
 
@@ -1636,15 +1158,10 @@ header {
 /* ========================= */
 
 footer {
-
     text-align: center;
-
     padding: 30px;
-
     color: var(--texto-secundario);
-
     font-size: 12px;
-
 }
 
 
@@ -1655,47 +1172,32 @@ footer {
 @media (max-width: 800px) {
 
     .encabezado {
-
         flex-direction: column;
-
         align-items: flex-start;
-
         gap: 15px;
-
     }
 
 
     .contenedor {
-
         grid-template-columns: 1fr;
-
         padding: 0 20px;
-
     }
 
 
     .barra-lateral {
-
         position: static;
-
     }
 
 
     .meses {
-
         display: grid;
-
         grid-template-columns: repeat(2, 1fr);
-
     }
 
 
     .titulo-seccion {
-
         align-items: flex-start;
-
         gap: 15px;
-
     }
 
 }
@@ -1708,84 +1210,59 @@ footer {
 @media (max-width: 600px) {
 
     .formulario-evento {
-
         padding: 25px 20px;
-
     }
 
 
     .fila-formulario {
-
         grid-template-columns: 1fr;
-
     }
 
 
     .botones-formulario {
-
         flex-direction: column;
-
     }
 
 
     .boton-cancelar,
     .boton-crear {
-
         width: 100%;
-
     }
 
 
     .evento {
-
         align-items: flex-start;
-
         flex-wrap: wrap;
-
     }
 
 
     .acciones-evento {
-
         width: 100%;
-
         margin-left: 95px;
-
     }
 
 
     .acciones-evento button,
     .acciones-evento a {
-
         flex: 1;
-
         text-align: center;
-
     }
 
 
     .acciones-evento form {
-
         flex: 1;
-
     }
 
 
     .acciones-evento form button {
-
         width: 100%;
-
     }
 
 
     .datos {
-
         flex-direction: column;
-
         align-items: flex-start;
-
         gap: 7px;
-
     }
 
 }
@@ -1800,9 +1277,7 @@ footer {
     *,
     *::before,
     *::after {
-
         transition-duration: 0.01ms !important;
-
     }
 
 }
