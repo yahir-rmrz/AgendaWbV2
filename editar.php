@@ -1,5 +1,18 @@
 <?php
 require 'conexion.php';
+require_once 'sesion.php';
+
+// Obtener el usuario que inició sesión.
+$usuario = usuarioActual();
+
+// Si no hay una sesión iniciada, regresar al login.
+if (!$usuario) {
+    header('Location: login.php');
+    exit;
+}
+
+// Obtener el ID del usuario actual.
+$idUsuario = (int)$usuario['id'];
 
 if (!function_exists('e')) {
     function e($texto) {
@@ -42,6 +55,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errores['categoria_id'] = 'Elige una categoría válida.';
     }
 
+    // Comprobar que el evento pertenece al usuario actual.
+    if (empty($errores)) {
+        $stmt = $conexion->prepare(
+            'SELECT id
+               FROM eventos
+              WHERE id = ? AND usuario_id = ?'
+        );
+
+        $stmt->bind_param('ii', $id, $idUsuario);
+        $stmt->execute();
+
+        $eventoPropio = $stmt->get_result()->fetch_assoc();
+
+        $stmt->close();
+
+        if (!$eventoPropio) {
+            $errores['general'] = 'El evento no existe o no tienes permiso para editarlo.';
+        }
+    }
+
     if (empty($errores)) {
         $horaBD = $hora !== '' ? $hora : null;
         $descBD = $descripcion !== '' ? $descripcion : null;
@@ -50,17 +83,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'UPDATE eventos
                 SET titulo = ?, fecha = ?, hora = ?,
                     categoria_id = ?, descripcion = ?
-              WHERE id = ?'
+              WHERE id = ? AND usuario_id = ?'
         );
 
         $stmt->bind_param(
-            'sssisi',
+            'sssisii',
             $titulo,
             $fecha,
             $horaBD,
             $categoriaId,
             $descBD,
-            $id
+            $id,
+            $idUsuario
         );
 
         if ($stmt->execute()) {
@@ -73,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errores['general'] = 'No se pudo actualizar el evento.';
         $stmt->close();
     }
+
 } else {
     // Cargar el evento a editar
     $id = (int)($_GET['id'] ?? 0);
@@ -80,16 +115,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conexion->prepare(
         'SELECT id, titulo, fecha, hora, categoria_id, descripcion
            FROM eventos
-          WHERE id = ?'
+          WHERE id = ? AND usuario_id = ?'
     );
-    $stmt->bind_param('i', $id);
+
+    $stmt->bind_param('ii', $id, $idUsuario);
     $stmt->execute();
     $evento = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
     if (!$evento) {
         $conexion->close();
-        header('Location: index.php?error=' . urlencode('El evento no existe.'));
+        header('Location: index.php?error=' . urlencode('El evento no existe o no tienes permiso para editarlo.'));
         exit;
     }
 

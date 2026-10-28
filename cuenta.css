@@ -1,0 +1,257 @@
+/* =========================================
+   AGENDAWEB · CUENTA (login, perfil, menú)
+   Usa las variables de estilos.css
+   ========================================= */
+
+
+/* ========================= */
+/* MENÚ DE CUENTA (header)   */
+/* ========================= */
+
+.menu-cuenta {
+    position: relative;
+}
+
+
+.boton-cuenta {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--acento-suave);
+    border: 1px solid var(--borde);
+    border-radius: 50%;
+    color: var(--acento-texto);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+
+.boton-cuenta:hover,
+.boton-cuenta[aria-expanded="true"] {
+    border-color: var(--acento);
+    box-shadow: var(--glow);
+}
+
+
+.boton-cuenta svg {
+    width: 22px;
+    height: 22px;
+}
+
+
+.menu-cuenta__panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 50;
+    min-width: 230px;
+    padding: 8px;
+    background-color: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-md);
+    box-shadow: var(--sombra-tarjeta);
+}
+
+
+.menu-cuenta__datos {
+    padding: 10px 12px 12px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--borde);
+}
+
+
+.menu-cuenta__datos strong {
+    display: block;
+    font-family: var(--fuente-titulo);
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+
+.menu-cuenta__datos span {
+    display: block;
+    margin-top: 2px;
+    color: var(--texto-secundario);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+
+.menu-cuenta__panel form {
+    margin: 0;
+}
+
+
+.menu-cuenta__item {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    background: none;
+    border: none;
+    border-radius: var(--radio-sm);
+    color: var(--texto-principal);
+    font-family: var(--fuente-cuerpo);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+
+.menu-cuenta__item:hover {
+    background-color: var(--hover-bg);
+    color: var(--acento-texto);
+}
+
+
+.menu-cuenta__item--salir:hover {
+    background-color: color-mix(in srgb, var(--error) 14%, transparent);
+    color: var(--error);
+}
+
+
+/* ========================= */
+/* PÁGINAS DE LOGIN / PERFIL */
+/* ========================= */
+
+.pagina-auth {
+    min-height: 100vh;
+}
+
+
+.auth {
+    max-width: 440px;
+    margin: 0 auto;
+    padding: 50px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+.auth--ancho {
+    max-width: 560px;
+}
+
+
+.auth__marca {
+    text-align: center;
+}
+
+
+.auth__marca h1 {
+    margin: 0;
+    color: var(--acento-texto);
+    font-family: var(--fuente-titulo);
+    font-size: 32px;
+}
+
+
+.auth__marca p {
+    margin: 6px 0 0;
+    color: var(--texto-secundario);
+}
+
+
+.auth__tarjeta {
+    background-color: var(--superficie);
+    border: 1px solid var(--borde);
+    border-top: var(--linea-header);
+    border-radius: var(--radio-md);
+    box-shadow: var(--sombra-panel);
+    padding: 28px;
+}
+
+
+.auth__subtitulo {
+    margin: 0 0 20px;
+    font-family: var(--fuente-titulo);
+    font-size: 20px;
+}
+
+
+.auth__tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 4px;
+    margin-bottom: 24px;
+    background-color: var(--campo-bg);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-sm);
+}
+
+
+.auth__tabs a {
+    padding: 10px;
+    border-radius: var(--radio-sm);
+    color: var(--texto-secundario);
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+
+.auth__tabs a:hover {
+    color: var(--texto-principal);
+}
+
+
+.auth__tabs a.activa {
+    background-color: var(--acento);
+    color: var(--texto-sobre-acento);
+    box-shadow: var(--glow);
+}
+
+
+.auth__boton {
+    width: 100%;
+    margin-top: 6px;
+}
+
+
+.auth__pie,
+.auth__volver {
+    margin: 18px 0 0;
+    color: var(--texto-secundario);
+    font-size: 13px;
+    text-align: center;
+}
+
+
+.auth__volver {
+    margin: 0;
+}
+
+
+.auth__pie a,
+.auth__volver a {
+    color: var(--acento-texto);
+    font-weight: 600;
+}
+
+
+.auth__nota {
+    margin: 0;
+    color: var(--texto-secundario);
+    font-size: 12px;
+}
+
+
+.error-campo {
+    color: var(--error);
+    font-size: 12px;
+}
+
+
+.campo input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

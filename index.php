@@ -1,7 +1,15 @@
 <?php
 
 require_once "conexion.php";
+require_once "sesion.php";
 
+$usuario = usuarioActual();
+
+// Si no hay una sesión iniciada, mostrar el login.
+if (!$usuario) {
+    header("Location: login.php");
+    exit;
+}
 
 /* =========================================
    FUNCIONES DE AYUDA
@@ -76,7 +84,7 @@ function mostrarEvento(array $ev): string
 
 
     /*
-       La tarjeta conserva las clases de P2/P3.
+       La tarjeta conserva las clases CSS de P2/P3.
 
        data-mes:
        0 = enero
@@ -218,15 +226,31 @@ function mostrarEvento(array $ev): string
    ========================================= */
 
 // INNER JOIN relaciona cada evento con su categoría.
-$resultado = $conexion->query(
-    'SELECT e.id, e.titulo, e.fecha, e.hora,
-            e.categoria_id, e.descripcion,
-            c.nombre AS categoria
-       FROM eventos e
-       INNER JOIN categorias c
-               ON c.id = e.categoria_id
-      ORDER BY e.fecha, e.hora'
-);
+// Se agrega el filtro para obtener únicamente los eventos
+// pertenecientes al usuario que inició sesión.
+
+$idUsuario = (int) $usuario['id'];
+
+$sqlEventos = '
+    SELECT e.id, e.titulo, e.fecha, e.hora,
+           e.categoria_id, e.descripcion,
+           c.nombre AS categoria
+      FROM eventos e
+      INNER JOIN categorias c
+              ON c.id = e.categoria_id
+     WHERE e.usuario_id = ?
+     ORDER BY e.fecha, e.hora
+';
+
+$stmtEventos = $conexion->prepare($sqlEventos);
+$stmtEventos->bind_param('i', $idUsuario);
+$stmtEventos->execute();
+
+$resultado = $stmtEventos->get_result();
+
+$eventos = $resultado->fetch_all(MYSQLI_ASSOC);
+
+$stmtEventos->close();
 
 
 /*
@@ -236,25 +260,33 @@ $resultado = $conexion->query(
    tabla categorias, en lugar de eventos.categoria.
 */
 
-$eventos = $resultado->fetch_all(MYSQLI_ASSOC);
-
-
 /* =========================================
    RESUMEN DE EVENTOS POR CATEGORÍA - P5
    ========================================= */
 
 // LEFT JOIN permite mostrar también las categorías
 // que todavía no tienen eventos registrados.
-$resultadoResumen = $conexion->query(
-    'SELECT c.id, c.nombre, COUNT(e.id) AS total
-       FROM categorias c
-       LEFT JOIN eventos e
-              ON e.categoria_id = c.id
-      GROUP BY c.id, c.nombre
-      ORDER BY c.nombre'
-);
+// El filtro limita el conteo a los eventos del usuario actual.
+
+$sqlResumen = '
+    SELECT c.id, c.nombre, COUNT(e.id) AS total
+      FROM categorias c
+      LEFT JOIN eventos e
+             ON e.categoria_id = c.id
+            AND e.usuario_id = ?
+     GROUP BY c.id, c.nombre
+     ORDER BY c.nombre
+';
+
+$stmtResumen = $conexion->prepare($sqlResumen);
+$stmtResumen->bind_param('i', $idUsuario);
+$stmtResumen->execute();
+
+$resultadoResumen = $stmtResumen->get_result();
 
 $resumenCategorias = $resultadoResumen->fetch_all(MYSQLI_ASSOC);
+
+$stmtResumen->close();
 
 
 /* =========================================
@@ -354,8 +386,12 @@ $conexion->close();
         rel="stylesheet"
         href="estilos.css">
 
+    <link
+        rel="stylesheet"
+        href="cuenta.css">
 
-    <title>AgendaWeb</title>
+
+    <title><?= htmlspecialchars($usuario['nombre'], ENT_QUOTES, 'UTF-8') ?></title>
 
 </head>
 
@@ -373,7 +409,7 @@ $conexion->close();
 
             <div>
 
-                <h1>AgendaWeb</h1>
+                <h1><?= htmlspecialchars($usuario['nombre'], ENT_QUOTES, 'UTF-8') ?></h1>
 
                 <p>
                     Organiza tus eventos y actividades
@@ -424,6 +460,101 @@ $conexion->close();
                     + Agregar evento
 
                 </button>
+
+
+                <!-- CUENTA -->
+
+                <div class="menu-cuenta" id="menuCuenta">
+
+                    <button
+                        type="button"
+                        class="boton-cuenta"
+                        id="botonCuenta"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                        aria-controls="panelCuenta"
+                        aria-label="Mi cuenta">
+
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+                        </svg>
+
+                    </button>
+
+
+                    <div
+                        class="menu-cuenta__panel"
+                        id="panelCuenta"
+                        hidden>
+
+                        <?php if ($usuario): ?>
+
+                            <div class="menu-cuenta__datos">
+
+                                <strong><?= e($usuario['nombre']) ?></strong>
+
+                                <span><?= e($usuario['correo']) ?></span>
+
+                            </div>
+
+                            <a
+                                class="menu-cuenta__item"
+                                href="perfil.php">
+
+                                Mi perfil
+
+                            </a>
+
+                            <form
+                                method="post"
+                                action="logout.php">
+
+                                <input
+                                    type="hidden"
+                                    name="csrf"
+                                    value="<?= e(tokenCsrf()) ?>">
+
+                                <button
+                                    type="submit"
+                                    class="menu-cuenta__item menu-cuenta__item--salir">
+
+                                    Cerrar sesión
+
+                                </button>
+
+                            </form>
+
+                        <?php else: ?>
+
+                            <a
+                                class="menu-cuenta__item"
+                                href="login.php">
+
+                                Iniciar sesión
+
+                            </a>
+
+                            <a
+                                class="menu-cuenta__item"
+                                href="login.php?modo=registro">
+
+                                Crear cuenta
+
+                            </a>
+
+                        <?php endif; ?>
+
+                    </div>
+
+                </div>
 
             </div>
 
@@ -1093,6 +1224,8 @@ $conexion->close();
     <!-- JAVASCRIPT -->
 
     <script src="script.js"></script>
+
+    <script src="cuenta.js"></script>
 
 
 </body>

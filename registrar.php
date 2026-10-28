@@ -1,5 +1,18 @@
 <?php
 require 'conexion.php';
+require_once 'sesion.php';
+
+// Obtener el usuario que inició sesión.
+$usuario = usuarioActual();
+
+// Si no hay una sesión iniciada, regresar al login.
+if (!$usuario) {
+    header('Location: login.php');
+    exit;
+}
+
+// Obtener el ID del usuario actual.
+$idUsuario = (int)$usuario['id'];
 
 if (!function_exists('e')) {
     function e($texto) {
@@ -49,14 +62,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $horaBD = $hora !== '' ? $hora : null;
         $descBD = $descripcion !== '' ? $descripcion : null;
 
+        // Se agrega usuario_id para asociar el evento
+        // exclusivamente con la cuenta que inició sesión.
         $sql = 'INSERT INTO eventos
-                (titulo, fecha, hora, categoria_id, descripcion)
-                VALUES (?, ?, ?, ?, ?)';
+                (usuario_id, titulo, fecha, hora, categoria_id, descripcion)
+                VALUES (?, ?, ?, ?, ?, ?)';
 
         $stmt = $conexion->prepare($sql);
 
         $stmt->bind_param(
-            'sssis',
+            'isssis',
+            $idUsuario,
             $titulo,
             $fecha,
             $horaBD,
@@ -68,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->close();
             $conexion->close();
 
-            header('Location: index.php');
+            header('Location: index.php?ok=1');
             exit;
         } else {
             $errores['general'] = 'No se pudo guardar el evento.';
