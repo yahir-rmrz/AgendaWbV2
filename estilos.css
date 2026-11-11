@@ -618,6 +618,171 @@ header {
 
 
 /* ========================= */
+/* BUSCADOR DE EVENTOS */
+/* ========================= */
+
+.buscador {
+    margin-bottom: 22px;
+}
+
+
+.buscador__etiqueta {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--texto-principal);
+}
+
+
+.buscador__campo {
+    position: relative;
+}
+
+
+.buscador__icono {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    width: 18px;
+    height: 18px;
+    transform: translateY(-50%);
+    color: var(--texto-secundario);
+    pointer-events: none;
+}
+
+
+.buscador__input {
+    width: 100%;
+    padding: 12px 40px 12px 40px;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-sm);
+    background-color: var(--campo-bg);
+    color: var(--texto-principal);
+    font-family: var(--fuente-cuerpo);
+    font-size: 14px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+
+.buscador__input::placeholder {
+    color: var(--texto-secundario);
+    opacity: 0.8;
+}
+
+
+.buscador__input:focus {
+    border-color: var(--acento);
+    box-shadow: var(--anillo-foco);
+}
+
+
+/* Se usa nuestro botón de borrar, no el nativo del navegador */
+
+.buscador__input::-webkit-search-cancel-button,
+.buscador__input::-webkit-search-decoration {
+    -webkit-appearance: none;
+    display: none;
+}
+
+
+.buscador__limpiar {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    transform: translateY(-50%);
+    border: none;
+    border-radius: var(--radio-sm);
+    background: transparent;
+    color: var(--texto-secundario);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+
+.buscador__limpiar:hover {
+    background-color: var(--hover-bg);
+    color: var(--texto-principal);
+}
+
+
+/* Lista de sugerencias (autocompletado) */
+
+.buscador__sugerencias {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    max-height: 260px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    background-color: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-md);
+    box-shadow: var(--sombra-tarjeta);
+}
+
+
+.sugerencia {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px;
+    border-radius: var(--radio-sm);
+    font-size: 14px;
+    color: var(--texto-principal);
+    cursor: pointer;
+}
+
+
+.sugerencia:hover,
+.sugerencia.activa {
+    background-color: var(--acento-suave);
+}
+
+
+.sugerencia__titulo strong {
+    color: var(--acento-texto);
+    font-weight: 700;
+}
+
+
+.sugerencia__fecha {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--texto-secundario);
+}
+
+
+.sugerencia--vacia {
+    justify-content: center;
+    color: var(--texto-secundario);
+    cursor: default;
+}
+
+
+.sugerencia--vacia:hover {
+    background-color: transparent;
+}
+
+
+/* Tarjeta elegida desde las sugerencias */
+
+.evento.evento-resaltado {
+    border-left-color: var(--acento);
+    box-shadow: var(--glow);
+}
+
+
+/* ========================= */
 /* EVENTOS */
 /* ========================= */
 

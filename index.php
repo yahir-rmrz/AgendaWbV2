@@ -121,7 +121,11 @@ function mostrarEvento(array $ev): string
     $html =
         '<article class="evento"'
         . ' data-mes="' . ((int) date('n', $marca) - 1) . '"'
-        . ' data-anio="' . (int) date('Y', $marca) . '">';
+        . ' data-anio="' . (int) date('Y', $marca) . '"'
+        // Búsqueda: id del evento y su título, para que el JS
+        // pueda localizar la tarjeta sin volver a consultar la BD.
+        . ' data-id="' . $id . '"'
+        . ' data-titulo="' . e($ev['titulo']) . '">';
 
 
     /* =========================================
@@ -507,6 +511,14 @@ $conexion->close();
 
                             <a
                                 class="menu-cuenta__item"
+                                href="/wiki/">
+
+                                Wiki / Documentación
+
+                            </a>
+
+                            <a
+                                class="menu-cuenta__item"
                                 href="perfil.php">
 
                                 Mi perfil
@@ -879,6 +891,78 @@ $conexion->close();
 
 
                 <!-- ========================= -->
+                <!-- BARRA DE BÚSQUEDA -->
+                <!-- Solo se muestra si el usuario tiene eventos. -->
+                <!-- Dentro de #seccionEventos, así se oculta junto -->
+                <!-- con la lista cuando se abre el formulario. -->
+                <!-- ========================= -->
+
+                <?php if (!empty($eventos)): ?>
+
+                    <div class="buscador" id="buscador">
+
+                        <label
+                            class="buscador__etiqueta"
+                            for="buscadorEventos">
+
+                            Buscar evento
+
+                        </label>
+
+                        <div class="buscador__campo">
+
+                            <svg
+                                class="buscador__icono"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true">
+                                <circle cx="11" cy="11" r="7"/>
+                                <path d="M20 20l-3.5-3.5"/>
+                            </svg>
+
+                            <input
+                                type="search"
+                                id="buscadorEventos"
+                                class="buscador__input"
+                                placeholder="Buscar por título. Ej. Examen"
+                                maxlength="120"
+                                autocomplete="off"
+                                role="combobox"
+                                aria-autocomplete="list"
+                                aria-expanded="false"
+                                aria-controls="sugerenciasEventos">
+
+                            <button
+                                type="button"
+                                class="buscador__limpiar"
+                                id="buscadorLimpiar"
+                                aria-label="Borrar búsqueda"
+                                title="Borrar búsqueda"
+                                hidden>
+
+                                ✕
+
+                            </button>
+
+                            <ul
+                                class="buscador__sugerencias"
+                                id="sugerenciasEventos"
+                                role="listbox"
+                                hidden>
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                <?php endif; ?>
+
+
+                <!-- ========================= -->
                 <!-- ESTADO VACÍO / FOREACH -->
                 <!-- ========================= -->
 
@@ -927,6 +1011,25 @@ $conexion->close();
 
                         <p>
                             No hay eventos para este mes.
+                        </p>
+
+                    </div>
+
+
+                    <!-- Se muestra cuando la búsqueda no encuentra nada -->
+
+                    <div
+                        class="sin-eventos"
+                        id="sinResultadosBusqueda"
+                        role="status"
+                        hidden>
+
+                        <h3>
+                            No se encontraron resultados
+                        </h3>
+
+                        <p>
+                            Ningún evento coincide con tu búsqueda.
                         </p>
 
                     </div>

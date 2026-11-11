@@ -5,6 +5,7 @@
    - filtrar las tarjetas por mes
    - dibujar el calendario y los contadores
    - mostrar / ocultar el formulario
+   - buscar eventos por título con autocompletado
    ========================================= */
 
 
@@ -114,6 +115,10 @@ function actualizarMesSeleccionado() {
 
 function seleccionarMes(mes, anio) {
 
+    /* Elegir un mes es volver al filtro por mes: se borra la búsqueda */
+
+    limpiarBusqueda();
+
     mesActual = mes;
 
     anioActual = anio;
@@ -124,6 +129,8 @@ function seleccionarMes(mes, anio) {
 
 
 function mesAnterior() {
+
+    limpiarBusqueda();
 
     mesActual--;
 
@@ -141,6 +148,8 @@ function mesAnterior() {
 
 
 function mesSiguiente() {
+
+    limpiarBusqueda();
 
     mesActual++;
 
@@ -163,8 +172,12 @@ function actualizarTituloMes() {
 
     document.getElementById("tituloCalendario").textContent = textoMes;
 
+    /* Con una búsqueda activa la lista ya no es de un solo mes */
+
     document.getElementById("subtituloEventos").textContent =
-        textoMes.toUpperCase();
+        busquedaActiva()
+            ? "RESULTADOS DE BÚSQUEDA"
+            : textoMes.toUpperCase();
 
 }
 
@@ -180,15 +193,41 @@ function filtrarTarjetas() {
 
     let visibles = 0;
 
+    const buscando = busquedaActiva();
+
     tarjetas.forEach(function (tarjeta) {
 
         const delMes =
             parseInt(tarjeta.dataset.mes) === mesActual &&
             parseInt(tarjeta.dataset.anio) === anioActual;
 
-        tarjeta.hidden = !delMes;
+        /*
+           Sin búsqueda: se filtra por mes (comportamiento original).
+           Con búsqueda: manda la búsqueda y se revisan todos los meses.
+        */
 
-        if (delMes) {
+        let visible = delMes;
+
+        if (idEventoSeleccionado !== null) {
+
+            visible = tarjeta.dataset.id === idEventoSeleccionado;
+
+        } else if (terminoBusqueda !== "") {
+
+            visible =
+                normalizarTexto(tarjeta.dataset.titulo)
+                    .includes(terminoBusqueda);
+
+        }
+
+        tarjeta.hidden = !visible;
+
+        tarjeta.classList.toggle(
+            "evento-resaltado",
+            idEventoSeleccionado !== null && visible
+        );
+
+        if (visible) {
 
             visibles++;
 
@@ -202,7 +241,17 @@ function filtrarTarjetas() {
 
     if (aviso) {
 
-        aviso.hidden = visibles > 0;
+        aviso.hidden = buscando || visibles > 0;
+
+    }
+
+    /* Aviso "no se encontraron resultados" de la búsqueda */
+
+    const avisoBusqueda = document.getElementById("sinResultadosBusqueda");
+
+    if (avisoBusqueda) {
+
+        avisoBusqueda.hidden = !buscando || visibles > 0;
 
     }
 
@@ -454,6 +503,451 @@ botonMeses.addEventListener("click", function () {
     botonMeses.setAttribute("aria-expanded", String(!cerrado));
 
 });
+
+
+/* =========================================
+   BÚSQUEDA DE EVENTOS + AUTOCOMPLETADO
+   Usa el arreglo "eventos" que PHP ya imprimió
+   (solo del usuario con sesión iniciada), así que
+   no hace ninguna consulta extra a la base de datos.
+   ========================================= */
+
+const campoBusqueda = document.getElementById("buscadorEventos");
+
+const listaSugerencias = document.getElementById("sugerenciasEventos");
+
+const botonLimpiarBusqueda = document.getElementById("buscadorLimpiar");
+
+
+/* Texto buscado (ya normalizado) */
+
+let terminoBusqueda = "";
+
+/* id (texto) del evento elegido en las sugerencias, o null */
+
+let idEventoSeleccionado = null;
+
+/* Posición resaltada con el teclado dentro de las sugerencias */
+
+let sugerenciaActiva = -1;
+
+
+/* Sin mayúsculas, sin acentos y sin espacios en los extremos */
+
+function normalizarTexto(texto) {
+
+    return String(texto === null || texto === undefined ? "" : texto)
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .toLowerCase()
+        .trim();
+
+}
+
+
+function busquedaActiva() {
+
+    return idEventoSeleccionado !== null || terminoBusqueda !== "";
+
+}
+
+
+/* Eventos cuyo título contiene el texto (los que empiezan igual, primero) */
+
+function buscarCoincidencias(termino) {
+
+    const coincidencias = eventos.filter(function (evento) {
+
+        return normalizarTexto(evento.titulo).includes(termino);
+
+    });
+
+    /* sort es estable: dentro de cada grupo se conserva el orden por fecha */
+
+    return coincidencias.sort(function (a, b) {
+
+        const aEmpieza = normalizarTexto(a.titulo).startsWith(termino);
+
+        const bEmpieza = normalizarTexto(b.titulo).startsWith(termino);
+
+        return Number(bEmpieza) - Number(aEmpieza);
+
+    });
+
+}
+
+
+/* "2026-10-08" -> "08/10/2026" */
+
+function fechaCorta(fecha) {
+
+    const f = partesFecha(fecha);
+
+    return (
+        String(f.dia).padStart(2, "0") + "/" +
+        String(f.mes + 1).padStart(2, "0") + "/" +
+        f.anio
+    );
+
+}
+
+
+/* Título con la parte coincidente en negritas (sin innerHTML: es seguro) */
+
+function crearTituloSugerencia(titulo, termino) {
+
+    const contenedor = document.createElement("span");
+
+    contenedor.className = "sugerencia__titulo";
+
+    const normalizado = normalizarTexto(titulo);
+
+    /* Si la normalización cambió la longitud, no se puede resaltar */
+
+    const inicio =
+        normalizado.length === titulo.length
+            ? normalizado.indexOf(termino)
+            : -1;
+
+    if (inicio === -1) {
+
+        contenedor.textContent = titulo;
+
+        return contenedor;
+
+    }
+
+    const fin = inicio + termino.length;
+
+    contenedor.appendChild(
+        document.createTextNode(titulo.slice(0, inicio))
+    );
+
+    const negrita = document.createElement("strong");
+
+    negrita.textContent = titulo.slice(inicio, fin);
+
+    contenedor.appendChild(negrita);
+
+    contenedor.appendChild(
+        document.createTextNode(titulo.slice(fin))
+    );
+
+    return contenedor;
+
+}
+
+
+function mostrarSugerencias() {
+
+    listaSugerencias.innerHTML = "";
+
+    sugerenciaActiva = -1;
+
+    if (terminoBusqueda === "" || idEventoSeleccionado !== null) {
+
+        cerrarSugerencias();
+
+        return;
+
+    }
+
+    const coincidencias = buscarCoincidencias(terminoBusqueda);
+
+    if (coincidencias.length === 0) {
+
+        const vacio = document.createElement("li");
+
+        vacio.className = "sugerencia sugerencia--vacia";
+
+        vacio.textContent = "No se encontraron resultados";
+
+        listaSugerencias.appendChild(vacio);
+
+    }
+
+    coincidencias.forEach(function (evento, posicion) {
+
+        const item = document.createElement("li");
+
+        item.className = "sugerencia";
+
+        item.id = "sugerenciaEvento" + posicion;
+
+        item.setAttribute("role", "option");
+
+        item.dataset.id = String(evento.id);
+
+        item.appendChild(
+            crearTituloSugerencia(evento.titulo, terminoBusqueda)
+        );
+
+        const fecha = document.createElement("span");
+
+        fecha.className = "sugerencia__fecha";
+
+        fecha.textContent = fechaCorta(evento.fecha);
+
+        item.appendChild(fecha);
+
+        listaSugerencias.appendChild(item);
+
+    });
+
+    listaSugerencias.hidden = false;
+
+    campoBusqueda.setAttribute("aria-expanded", "true");
+
+}
+
+
+function cerrarSugerencias() {
+
+    listaSugerencias.hidden = true;
+
+    sugerenciaActiva = -1;
+
+    campoBusqueda.setAttribute("aria-expanded", "false");
+
+    campoBusqueda.removeAttribute("aria-activedescendant");
+
+}
+
+
+/* Mueve el resaltado del teclado entre las sugerencias */
+
+function moverSugerencia(paso) {
+
+    const opciones = listaSugerencias.querySelectorAll(
+        ".sugerencia[role='option']"
+    );
+
+    if (opciones.length === 0) {
+
+        return;
+
+    }
+
+    if (sugerenciaActiva >= 0) {
+
+        opciones[sugerenciaActiva].classList.remove("activa");
+
+        opciones[sugerenciaActiva].removeAttribute("aria-selected");
+
+    }
+
+    sugerenciaActiva =
+        (sugerenciaActiva + paso + opciones.length) % opciones.length;
+
+    const actual = opciones[sugerenciaActiva];
+
+    actual.classList.add("activa");
+
+    actual.setAttribute("aria-selected", "true");
+
+    campoBusqueda.setAttribute("aria-activedescendant", actual.id);
+
+    actual.scrollIntoView({ block: "nearest" });
+
+}
+
+
+/* El usuario eligió una sugerencia: se muestra ese evento */
+
+function seleccionarSugerencia(id) {
+
+    const evento = eventos.find(function (e) {
+
+        return String(e.id) === String(id);
+
+    });
+
+    if (!evento) {
+
+        return;
+
+    }
+
+    idEventoSeleccionado = String(evento.id);
+
+    terminoBusqueda = normalizarTexto(evento.titulo);
+
+    campoBusqueda.value = evento.titulo;
+
+    botonLimpiarBusqueda.hidden = false;
+
+    cerrarSugerencias();
+
+    /* El calendario y la barra lateral saltan al mes del evento */
+
+    const f = partesFecha(evento.fecha);
+
+    mesActual = f.mes;
+
+    anioActual = f.anio;
+
+    actualizarInterfaz();
+
+    const tarjeta = document.querySelector(
+        '#listaEventos .evento[data-id="' + idEventoSeleccionado + '"]'
+    );
+
+    if (tarjeta) {
+
+        tarjeta.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    }
+
+}
+
+
+/* Borra la búsqueda. No redibuja: quien la llama decide cuándo */
+
+function limpiarBusqueda() {
+
+    terminoBusqueda = "";
+
+    idEventoSeleccionado = null;
+
+    if (!campoBusqueda) {
+
+        return;
+
+    }
+
+    campoBusqueda.value = "";
+
+    botonLimpiarBusqueda.hidden = true;
+
+    listaSugerencias.innerHTML = "";
+
+    cerrarSugerencias();
+
+}
+
+
+/* Solo se activa si index.php dibujó la barra (hay eventos) */
+
+if (campoBusqueda) {
+
+    /* Al escribir: sugerencias y lista se actualizan en tiempo real */
+
+    campoBusqueda.addEventListener("input", function () {
+
+        idEventoSeleccionado = null;
+
+        terminoBusqueda = normalizarTexto(campoBusqueda.value);
+
+        botonLimpiarBusqueda.hidden = campoBusqueda.value === "";
+
+        mostrarSugerencias();
+
+        actualizarTituloMes();
+
+        filtrarTarjetas();
+
+    });
+
+
+    campoBusqueda.addEventListener("focus", function () {
+
+        if (terminoBusqueda !== "" && idEventoSeleccionado === null) {
+
+            mostrarSugerencias();
+
+        }
+
+    });
+
+
+    campoBusqueda.addEventListener("keydown", function (evento) {
+
+        if (evento.key === "ArrowDown") {
+
+            evento.preventDefault();
+
+            if (listaSugerencias.hidden) {
+
+                mostrarSugerencias();
+
+            }
+
+            moverSugerencia(1);
+
+        } else if (evento.key === "ArrowUp") {
+
+            evento.preventDefault();
+
+            moverSugerencia(-1);
+
+        } else if (evento.key === "Enter") {
+
+            evento.preventDefault();
+
+            const activa = listaSugerencias.querySelector(
+                ".sugerencia.activa"
+            );
+
+            if (activa) {
+
+                seleccionarSugerencia(activa.dataset.id);
+
+            } else {
+
+                cerrarSugerencias();
+
+            }
+
+        } else if (evento.key === "Escape") {
+
+            cerrarSugerencias();
+
+        }
+
+    });
+
+
+    /* mousedown (y no click) evita que el campo pierda el foco antes */
+
+    listaSugerencias.addEventListener("mousedown", function (evento) {
+
+        evento.preventDefault();
+
+        const item = evento.target.closest(".sugerencia[role='option']");
+
+        if (item) {
+
+            seleccionarSugerencia(item.dataset.id);
+
+        }
+
+    });
+
+
+    botonLimpiarBusqueda.addEventListener("click", function () {
+
+        limpiarBusqueda();
+
+        actualizarInterfaz();
+
+        campoBusqueda.focus();
+
+    });
+
+
+    /* Clic fuera de la barra: se cierran las sugerencias */
+
+    document.addEventListener("mousedown", function (evento) {
+
+        if (!evento.target.closest("#buscador")) {
+
+            cerrarSugerencias();
+
+        }
+
+    });
+
+}
 
 
 /* =========================================
